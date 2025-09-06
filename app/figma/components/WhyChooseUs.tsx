@@ -1,4 +1,4 @@
-import { Shield, Heart, Video, Lock, Globe, Gift } from "lucide-react";
+import { Shield, Heart, Phone, Lock, Globe, Gift } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 
 const features = [
@@ -13,9 +13,9 @@ const features = [
     subtitle: "Conecta con personas que realmente entienden y quieren ayudar sin juzgar."
   },
   {
-    icon: Video,
-    title: "Video Chat 1 a 1",
-    subtitle: "Conversaciones privadas de voz que crean conexiones humanas reales."
+    icon: Phone,
+    title: "Llamadas de Voz 1 a 1",
+    subtitle: "Conversaciones privadas de voz que crean conexiones humanas reales y auténticas."
   },
   {
     icon: Shield,

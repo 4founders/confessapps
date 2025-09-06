@@ -5,10 +5,15 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Heart, Shield, Lock, Users, Mail, Eye, EyeOff, ArrowLeft, Sparkles, MessageCircle } from 'lucide-react';
 import { countries, languages, genderOptions } from '../data/countries-languages';
+import { ConfessAppsLogo } from './ConfessAppsLogo';
 
 type AuthState = 'login' | 'register' | 'forgotPassword';
 
-export function Auth() {
+interface AuthProps {
+  onNavigate?: (page: string) => void;
+}
+
+export function Auth({ onNavigate }: AuthProps) {
   const [authState, setAuthState] = useState<AuthState>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -176,11 +181,17 @@ export function Auth() {
         <div className={`space-y-6 transition-opacity duration-500 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
           {/* Logo y título */}
           <div className="text-center space-y-2">
-            <div className="flex items-center justify-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
-                <Heart className="w-6 h-6 text-white" />
+            <div 
+              className="flex items-center justify-center space-x-2 mb-6 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => onNavigate?.('landing')}
+            >
+              <div className="w-10 h-10 border-2 border-rose-500 rounded-full flex items-center justify-center shadow-lg bg-transparent">
+                <ConfessAppsLogo className="w-6 h-6 object-contain" />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">ConfessApps</span>
+              <span className="text-2xl font-bold">
+                <span className="text-slate-900">Confess</span>
+                <span className="text-rose-600">Apps</span>
+              </span>
             </div>
             
             {authState === 'login' && (

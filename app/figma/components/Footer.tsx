@@ -40,7 +40,7 @@ export function Footer() {
         
         {/* Copyright */}
         <div className="text-center text-sm text-slate-400 border-t border-slate-700 pt-6">
-          Todos los derechos reservados ConfessApps&reg; 2025
+          Todos los derechos reservados ConfessApps 2025
         </div>
       </div>
     </footer>

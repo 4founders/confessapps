@@ -4,7 +4,7 @@ Proyecto desarrollado principalmente con FigmaMake.
 Para actualizar el resultado de figma:
 
 1. Extaer .zip descargado de figma y pegarlos dentro de @/app/figma/
-2. Ejecutar y copiar el resultado de:
+2. Ejecutar y copiar el resultado de (exceptuando react-day-picker):
 ```bash
 node scan-imports.js
 ```

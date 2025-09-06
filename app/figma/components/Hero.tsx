@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 
 export function Hero() {
   return (
-    <section className="relative h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50 pt-16 pb-20 sm:pt-24 sm:pb-28 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50 pt-16 pb-20 sm:pt-24 sm:pb-28 overflow-hidden">
       {/* Brand Patterns */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Geometric brand pattern */}
@@ -82,13 +82,13 @@ export function Hero() {
         <div className="absolute bottom-32 right-20 w-16 h-16 bg-gradient-to-br from-pink-200 to-orange-200 opacity-15 transform rotate-12" style={{borderRadius: '30% 70% 70% 30%'}}></div>
       </div>
 
-      <div className="relative pt-[10vh] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           {/* Frase principal grande */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
             Un espacio seguro para{" "}
-            <span className="text-rose-600">conectar </span>{" "}
-            a quienes necesitan ser escuchados
+            <span className="text-rose-600">conectar corazones</span>{" "}
+            que necesitan ser escuchados
           </h1>
           
           {/* Frase más pequeña */}
