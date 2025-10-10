@@ -23,14 +23,14 @@ type AppState =
 
 export default function App() {
   const [currentPage, setCurrentPage] =
-    useState<AppState>("landing");
+    useState<AppState>("app");
 
   const handleNavigation = (page: string) => {
     setCurrentPage(page as AppState);
   };
 
   if (currentPage === "app") {
-    return <AppLayout />;
+    return <AppLayout onNavigate={handleNavigation} />;
   }
 
   if (currentPage === "auth") {

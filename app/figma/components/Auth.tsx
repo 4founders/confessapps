@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Heart, Shield, Lock, Users, Mail, Eye, EyeOff, ArrowLeft, Sparkles, MessageCircle } from 'lucide-react';
+import { Heart, Shield, Lock, Users, Mail, Eye, EyeOff, ArrowLeft, Sparkles, MessageCircle, Loader2 } from 'lucide-react';
 import { countries, languages, genderOptions } from '../data/countries-languages';
 import { ConfessAppsLogo } from './ConfessAppsLogo';
 
@@ -19,6 +19,10 @@ export function Auth({ onNavigate }: AuthProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState(false);
+  const [registerError, setRegisterError] = useState('');
+  const [registerEmailSent, setRegisterEmailSent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +33,56 @@ export function Auth({ onNavigate }: AuthProps) {
       return;
     }
     
-    // Aquí iría la lógica de autenticación para login y register
-    console.log('Form submitted for:', authState);
+    if (authState === 'login') {
+      // Limpiar error previo
+      setLoginError(false);
+      setIsLoading(true);
+      
+      // Obtener valores del formulario
+      const form = e.target as HTMLFormElement;
+      const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+      const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+      
+      // Simular validación con timeout de 2 segundos
+      setTimeout(() => {
+        if (email === 'contacto@confessapps.com' && password === '12345678') {
+          // Credenciales correctas - navegar a la app
+          setIsLoading(false);
+          onNavigate?.('app');
+        } else {
+          // Credenciales incorrectas - mostrar error
+          setIsLoading(false);
+          setLoginError(true);
+        }
+      }, 2000);
+      
+      return;
+    }
+    
+    if (authState === 'register') {
+      // Limpiar error previo
+      setRegisterError('');
+      setIsLoading(true);
+      
+      // Obtener valores del formulario
+      const form = e.target as HTMLFormElement;
+      const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+      
+      // Simular validación con timeout de 2 segundos
+      setTimeout(() => {
+        if (email === 'contacto@confessapps.com') {
+          // Email ya registrado - mostrar error
+          setIsLoading(false);
+          setRegisterError('Correo electronico ya registrado');
+        } else {
+          // Email válido - mostrar mensaje de confirmación
+          setIsLoading(false);
+          setRegisterEmailSent(true);
+        }
+      }, 2000);
+      
+      return;
+    }
   };
 
   const handleStateChange = (newState: AuthState) => {
@@ -39,6 +91,10 @@ export function Auth({ onNavigate }: AuthProps) {
     setIsTransitioning(true);
     // Resetear el estado de email enviado cuando cambiamos de vista
     setResetEmailSent(false);
+    setRegisterEmailSent(false);
+    // Limpiar errores cuando cambiamos de vista
+    setLoginError(false);
+    setRegisterError('');
     setTimeout(() => {
       setAuthState(newState);
       setTimeout(() => {
@@ -46,6 +102,37 @@ export function Auth({ onNavigate }: AuthProps) {
       }, 50);
     }, 300);
   };
+
+  // useEffect para limpiar los errores cuando el usuario empieza a escribir
+  useEffect(() => {
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    
+    const clearLoginError = () => {
+      if (loginError) {
+        setLoginError(false);
+      }
+    };
+
+    const clearRegisterError = () => {
+      if (registerError) {
+        setRegisterError('');
+      }
+    };
+    
+    if (authState === 'login') {
+      emailInput?.addEventListener('input', clearLoginError);
+      passwordInput?.addEventListener('input', clearLoginError);
+    } else if (authState === 'register') {
+      emailInput?.addEventListener('input', clearRegisterError);
+    }
+    
+    return () => {
+      emailInput?.removeEventListener('input', clearLoginError);
+      passwordInput?.removeEventListener('input', clearLoginError);
+      emailInput?.removeEventListener('input', clearRegisterError);
+    };
+  }, [loginError, registerError, authState]);
 
   const renderIllustrations = () => (
     <div className="relative flex items-center justify-center h-full overflow-hidden">
@@ -208,12 +295,18 @@ export function Auth({ onNavigate }: AuthProps) {
               <div className="space-y-2">
                 <h1 className="text-2xl font-bold text-slate-900">Iniciar Sesión</h1>
                 <p className="text-slate-600">Accede a tu espacio seguro</p>
+                {loginError && (
+                  <p className="text-red-600 text-sm font-medium">Credenciales Incorrectas</p>
+                )}
               </div>
             )}
             {authState === 'register' && (
               <div className="space-y-2">
                 <h1 className="text-2xl font-bold text-slate-900">Crear Cuenta</h1>
                 <p className="text-slate-600">Únete a nuestra comunidad de apoyo</p>
+                {registerError && (
+                  <p className="text-red-600 text-sm font-medium">{registerError}</p>
+                )}
               </div>
             )}
             {authState === 'forgotPassword' && (
@@ -234,7 +327,23 @@ export function Auth({ onNavigate }: AuthProps) {
           {/* Formulario */}
           <div className="pr-2">
             <form onSubmit={handleSubmit} className="space-y-3">
-              {authState === 'register' && (
+              {/* Mostrar mensaje de confirmación para register */}
+              {authState === 'register' && registerEmailSent ? (
+                <div className="text-center space-y-4 py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="w-8 h-8 text-green-600" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-slate-900">¡Correo enviado!</h3>
+                    <p className="text-slate-600 leading-relaxed">
+                      Se ha enviado un email de confirmación a su correo electrónico.
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      Por favor, revise su bandeja de entrada y carpeta de spam.
+                    </p>
+                  </div>
+                </div>
+              ) : authState === 'register' && !registerEmailSent ? (
                 <>
                   <div className="space-y-1">
                     <Label htmlFor="name">Nombre completo</Label>
@@ -309,7 +418,7 @@ export function Auth({ onNavigate }: AuthProps) {
                     </div>
                   </div>
                 </>
-              )}
+              ) : null}
 
               {/* Mostrar mensaje de confirmación para forgotPassword */}
               {authState === 'forgotPassword' && resetEmailSent ? (
@@ -386,14 +495,26 @@ export function Auth({ onNavigate }: AuthProps) {
                 </>
               )}
 
-              {!(authState === 'forgotPassword' && resetEmailSent) && (
+              {!(authState === 'forgotPassword' && resetEmailSent) && !(authState === 'register' && registerEmailSent) && (
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white py-2 h-10 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] mt-4"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white py-2 h-10 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] mt-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {authState === 'login' && 'Iniciar Sesión'}
-                  {authState === 'register' && 'Crear Cuenta'}
-                  {authState === 'forgotPassword' && 'Enviar Enlace de Recuperación'}
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {authState === 'login' && 'Verificando...'}
+                      {authState === 'register' && 'Creando cuenta...'}
+                      {authState === 'forgotPassword' && 'Enviando...'}
+                    </span>
+                  ) : (
+                    <>
+                      {authState === 'login' && 'Iniciar Sesión'}
+                      {authState === 'register' && 'Crear Cuenta'}
+                      {authState === 'forgotPassword' && 'Enviar Enlace de Recuperación'}
+                    </>
+                  )}
                 </Button>
               )}
             </form>
@@ -421,7 +542,7 @@ export function Auth({ onNavigate }: AuthProps) {
               </>
             )}
 
-            {authState === 'register' && (
+            {authState === 'register' && !registerEmailSent && (
               <>
                 <div className="text-xs text-slate-500 leading-relaxed">
                   Al crear una cuenta, aceptas nuestros términos de servicio y política de privacidad
@@ -436,6 +557,20 @@ export function Auth({ onNavigate }: AuthProps) {
                   </button>
                 </div>
               </>
+            )}
+
+            {authState === 'register' && registerEmailSent && (
+              <div className="text-slate-600">
+                <button
+                  onClick={() => {
+                    setRegisterEmailSent(false);
+                    handleStateChange('login');
+                  }}
+                  className="text-rose-600 hover:text-rose-700 font-semibold transition-colors hover:underline"
+                >
+                  Volver al inicio de sesión
+                </button>
+              </div>
             )}
 
             {authState === 'forgotPassword' && !resetEmailSent && (

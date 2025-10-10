@@ -37,7 +37,11 @@ interface Story {
   storyText?: string;
 }
 
-export function AppLayout() {
+interface AppLayoutProps {
+  onNavigate: (page: string) => void;
+}
+
+export function AppLayout({ onNavigate }: AppLayoutProps) {
   const [activeTab, setActiveTab] =
     useState<TabType>("connect");
   const [appState, setAppState] = useState<AppState>("main");
@@ -313,7 +317,7 @@ export function AppLayout() {
                 size="sm"
                 className="w-full bg-transparent border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
                 onClick={() => {
-                  /* TODO: Implement logout */
+                  onNavigate("auth");
                 }}
               >
                 <LogOut className="w-4 h-4 mr-2" />
