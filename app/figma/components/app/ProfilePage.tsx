@@ -2,7 +2,8 @@ import { StoryCard } from "./StoryCard";
 import { PostCard } from "./PostCard";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 
-const defaultProfileImage = "https://images.unsplash.com/photo-1710997740246-75b30937dd6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwcG9ydHJhaXR8ZW58MXx8fHwxNzU2OTQwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+const defaultProfileImage = "https://images.unsplash.com/photo-1710997740246-75b30937dd6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwcG9ydHJhaXR8ZW58MXx8fHwxNzU2OTQwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
+
 // Mock data for user's own stories
 const userStories = [
   {
@@ -74,11 +75,41 @@ const userPosts = [
 ];
 
 // Default profile image
-//const defaultProfileImage = "https://images.unsplash.com/photo-1710997740246-75b30937dd6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwcG9ydHJhaXR8ZW58MXx8fHwxNzU2OTQwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral";
 
-export function ProfilePage() {
+
+interface Story {
+  nickname: string;
+  profileImage?: string;
+  storyImage?: string;
+  storyText?: string;
+}
+
+interface ProfilePageProps {
+  onViewStory?: (stories: Story[], initialIndex: number) => void;
+}
+
+export function ProfilePage({ onViewStory }: ProfilePageProps) {
   const handleStoryClick = (createdAt: string) => {
-    console.log("Ver historia del:", createdAt);
+    if (onViewStory) {
+      // Convertir las historias del usuario al formato correcto para StoryViewer
+      const storyData: Story[] = userStories.map((story, index) => ({
+        nickname: story.nickname,
+        profileImage: defaultProfileImage,
+        storyImage: story.storyImage,
+        // Agregar algunos textos alternativos para variedad
+        ...(index % 3 === 0 ? { 
+          storyText: index === 0 ? "Momento de reflexión y paz interior" :
+                     index === 3 ? "Practicando gratitud en mi día a día" :
+                     "Encontrando belleza en las pequeñas cosas"
+        } : {})
+      }));
+      
+      // Encontrar el índice de la historia clickeada
+      const storyIndex = userStories.findIndex(story => story.createdAt === createdAt);
+      onViewStory(storyData, storyIndex >= 0 ? storyIndex : 0);
+    } else {
+      console.log("Ver historia del:", createdAt);
+    }
   };
 
   return (

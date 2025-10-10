@@ -1,20 +1,52 @@
 import { useState } from "react";
-import { Phone, Search, User, Settings, LogOut } from "lucide-react";
+import {
+  Phone,
+  Search,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { ConnectPage } from "./app/ConnectPage";
 import { ExplorePage } from "./app/ExplorePage";
 import { ProfilePage } from "./app/ProfilePage";
 import { SettingsPage } from "./app/SettingsPage";
 import { CallPage } from "./app/CallPage";
+import { CreatePostPage } from "./app/CreatePostPage";
+import { CreateStoryPage } from "./app/CreateStoryPage";
+import { StoryViewer } from "./app/StoryViewer";
+import { PremiumUpgrade } from "./app/PremiumUpgrade";
+import { Summary } from "./app/Summary";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button";
 import { ConfessAppsLogo } from "./ConfessAppsLogo";
 
 type TabType = "connect" | "explore" | "profile" | "settings";
-type AppState = "main" | "call";
+type AppState =
+  | "main"
+  | "call"
+  | "createPost"
+  | "createStory"
+  | "viewStory"
+  | "premiumUpgrade"
+  | "summary";
+
+interface Story {
+  nickname: string;
+  profileImage?: string;
+  storyImage?: string;
+  storyText?: string;
+}
 
 export function AppLayout() {
-  const [activeTab, setActiveTab] = useState<TabType>("connect");
+  const [activeTab, setActiveTab] =
+    useState<TabType>("connect");
   const [appState, setAppState] = useState<AppState>("main");
+  const [storyViewData, setStoryViewData] = useState<{
+    stories: Story[];
+    initialIndex: number;
+  } | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<"free" | "premium">("free");
+  const [selectedBillingCycle, setSelectedBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
   const handleStartCall = () => {
     setAppState("call");
@@ -25,9 +57,151 @@ export function AppLayout() {
     setActiveTab("connect");
   };
 
+  const handleCreatePost = () => {
+    setAppState("createPost");
+  };
+
+  const handleCancelCreatePost = () => {
+    setAppState("main");
+    setActiveTab("explore");
+  };
+
+  const handleSubmitPost = (data: {
+    nickname: string;
+    text: string;
+    image?: File;
+  }) => {
+    // TODO: Implement post creation logic
+    console.log("Creating post:", data);
+    setAppState("main");
+    setActiveTab("explore");
+  };
+
+  const handleCreateStory = () => {
+    setAppState("createStory");
+  };
+
+  const handleCancelCreateStory = () => {
+    setAppState("main");
+    setActiveTab("explore");
+  };
+
+  const handleSubmitStory = (data: {
+    nickname: string;
+    image: File;
+  }) => {
+    // TODO: Implement story creation logic
+    console.log("Creating story:", data);
+    setAppState("main");
+    setActiveTab("explore");
+  };
+
+  const handleViewStory = (
+    stories: Story[],
+    initialIndex: number,
+  ) => {
+    setStoryViewData({ stories, initialIndex });
+    setAppState("viewStory");
+  };
+
+  const handleCloseStory = () => {
+    setAppState("main");
+    setActiveTab("explore");
+    setStoryViewData(null);
+  };
+
+  const handleNavigateToPremium = () => {
+    setAppState("premiumUpgrade");
+  };
+
+  const handleClosePremiumUpgrade = () => {
+    setAppState("main");
+    setActiveTab("settings");
+  };
+
+  const handleUpgradeToPremium = () => {
+    setCurrentPlan("premium");
+  };
+
+  const handleNavigateToSummary = (billingCycle: 'monthly' | 'annual') => {
+    setSelectedBillingCycle(billingCycle);
+    setAppState("summary");
+  };
+
+  const handleBackFromSummary = () => {
+    setAppState("premiumUpgrade");
+  };
+
+  const handleProceedToPayment = () => {
+    // TODO: Implement payment logic
+    console.log("Proceeding to payment...");
+    // For now, just go back to settings
+    setAppState("main");
+    setActiveTab("settings");
+  };
+
+  const handleCancelSummary = () => {
+    setAppState("main");
+    setActiveTab("settings");
+  };
+
   // If in call state, show call page
   if (appState === "call") {
     return <CallPage onEndCall={handleEndCall} />;
+  }
+
+  // If in create post state, show create post page
+  if (appState === "createPost") {
+    return (
+      <CreatePostPage
+        onCancel={handleCancelCreatePost}
+        onCreatePost={handleSubmitPost}
+      />
+    );
+  }
+
+  // If in create story state, show create story page
+  if (appState === "createStory") {
+    return (
+      <CreateStoryPage
+        onCancel={handleCancelCreateStory}
+        onCreateStory={handleSubmitStory}
+      />
+    );
+  }
+
+  // If in view story state, show story viewer
+  if (appState === "viewStory" && storyViewData) {
+    return (
+      <StoryViewer
+        stories={storyViewData.stories}
+        initialIndex={storyViewData.initialIndex}
+        onClose={handleCloseStory}
+      />
+    );
+  }
+
+  // If in premium upgrade state, show premium upgrade page
+  if (appState === "premiumUpgrade") {
+    return (
+      <PremiumUpgrade
+        onClose={handleClosePremiumUpgrade}
+        onUpgrade={handleUpgradeToPremium}
+        onNavigateToSummary={handleNavigateToSummary}
+      />
+    );
+  }
+
+  // If in summary state, show summary page
+  if (appState === "summary") {
+    return (
+      <Summary
+        billingCycle={selectedBillingCycle}
+        onBack={handleBackFromSummary}
+        onProceedToPayment={handleProceedToPayment}
+        onCancel={handleCancelSummary}
+      />
+    );
   }
 
   const tabs = [
@@ -35,31 +209,51 @@ export function AppLayout() {
       id: "connect" as const,
       label: "Conectar",
       icon: Phone,
-      component: (props: any) => <ConnectPage onStartCall={handleStartCall} {...props} />,
+      component: (props: any) => (
+        <ConnectPage onStartCall={handleStartCall} {...props} />
+      ),
     },
     {
       id: "explore" as const,
       label: "Explorar",
       icon: Search,
-      component: ExplorePage,
+      component: (props: any) => (
+        <ExplorePage
+          onCreatePost={handleCreatePost}
+          onCreateStory={handleCreateStory}
+          onViewStory={handleViewStory}
+          {...props}
+        />
+      ),
     },
     {
       id: "profile" as const,
       label: "Perfil",
       icon: User,
-      component: ProfilePage,
+      component: (props: any) => (
+        <ProfilePage onViewStory={handleViewStory} {...props} />
+      ),
     },
     {
       id: "settings" as const,
       label: "Ajustes",
       icon: Settings,
-      component: SettingsPage,
+      component: (props: any) => (
+        <SettingsPage 
+          currentPlan={currentPlan}
+          setCurrentPlan={setCurrentPlan}
+          onNavigateToPremium={handleNavigateToPremium}
+          {...props} 
+        />
+      ),
     },
   ];
 
   const ActiveComponent =
     tabs.find((tab) => tab.id === activeTab)?.component ||
-    ((props: any) => <ConnectPage onStartCall={handleStartCall} {...props} />);
+    ((props: any) => (
+      <ConnectPage onStartCall={handleStartCall} {...props} />
+    ));
 
   return (
     <div className="h-screen bg-black text-white overflow-hidden">
@@ -73,7 +267,9 @@ export function AppLayout() {
               <ConfessAppsLogo className="w-8 h-8 object-contain" />
               <span className="text-xl font-semibold">
                 <span className="text-white">Confess</span>
-                <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Apps</span>
+                <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                  Apps
+                </span>
               </span>
             </div>
           </div>
@@ -88,8 +284,8 @@ export function AppLayout() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 text-orange-400 border border-orange-500/30'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                      ? "bg-gradient-to-r from-red-500/20 to-orange-500/20 text-orange-400 border border-orange-500/30"
+                      : "text-gray-400 hover:text-white hover:bg-gray-800"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -109,12 +305,16 @@ export function AppLayout() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="text-gray-300 text-sm mb-4">@felipe123</span>
+              <span className="text-gray-300 text-sm mb-4">
+                @felipe123
+              </span>
               <Button
                 variant="outline"
                 size="sm"
                 className="w-full bg-transparent border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
-                onClick={() => {/* TODO: Implement logout */}}
+                onClick={() => {
+                  /* TODO: Implement logout */
+                }}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Cerrar sesión

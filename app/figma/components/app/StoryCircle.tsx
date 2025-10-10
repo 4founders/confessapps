@@ -12,7 +12,7 @@ export function StoryCircle({ nickname, profileImage, isAddStory = false, onClic
   if (isAddStory) {
     return (
       <div className="flex flex-col items-center space-y-2 cursor-pointer" onClick={onClick}>
-        <div className="w-16 h-16 bg-gray-800 border-2 border-dashed border-gray-600 rounded-full flex items-center justify-center hover:border-orange-500 transition-colors">
+        <div className="w-16 h-16 bg-gray-800 border-2 border-dashed border-gray-600 rounded-full flex items-center justify-center hover:border-orange-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer active:scale-95">
           <Plus className="w-6 h-6 text-gray-400 hover:text-orange-500 transition-colors" />
         </div>
         <span className="text-xs text-gray-400">Tu historia</span>
@@ -21,8 +21,8 @@ export function StoryCircle({ nickname, profileImage, isAddStory = false, onClic
   }
 
   return (
-    <div className="flex flex-col items-center space-y-2 cursor-pointer" onClick={onClick}>
-      <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full p-0.5">
+    <div className="flex flex-col items-center space-y-2 cursor-pointer hover:scale-105 transition-transform duration-200" onClick={onClick}>
+      <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full p-0.5 shadow-lg hover:shadow-xl transition-shadow">
         <div className="w-full h-full bg-black rounded-full p-0.5">
           {profileImage ? (
             <ImageWithFallback

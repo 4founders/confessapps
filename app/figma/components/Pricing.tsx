@@ -3,7 +3,11 @@ import { Check } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
-export function Pricing() {
+interface PricingProps {
+  onNavigate?: (page: string) => void;
+}
+
+export function Pricing({ onNavigate }: PricingProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
   const premiumPriceMonthly = 7990;
@@ -144,7 +148,10 @@ export function Pricing() {
               ))}
             </div>
 
-            <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white">
+            <Button 
+              onClick={() => onNavigate?.("auth")}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white"
+            >
               Comienza gratis
             </Button>
           </div>
@@ -191,7 +198,10 @@ export function Pricing() {
               ))}
             </div>
 
-            <Button className="w-full bg-rose-600 hover:bg-rose-700 text-white">
+            <Button 
+              onClick={() => onNavigate?.("auth")}
+              className="w-full bg-rose-600 hover:bg-rose-700 text-white"
+            >
               Comienza con Premium
             </Button>
           </div>
@@ -201,9 +211,12 @@ export function Pricing() {
         <div className="text-center mt-12">
           <p className="text-slate-600">
             ¿Tienes preguntas? {" "}
-            <a href="#contacto" className="text-rose-600 hover:text-rose-700 font-medium">
+            <button 
+              onClick={() => onNavigate?.("contact")}
+              className="text-rose-600 hover:text-rose-700 font-medium"
+            >
               Contáctanos
-            </a>
+            </button>
           </p>
         </div>
       </div>

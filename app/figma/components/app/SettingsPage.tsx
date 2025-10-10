@@ -3,13 +3,39 @@ import { Camera } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Switch } from "../ui/switch";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Crown, User, Settings as SettingsIcon, Globe, Phone, Mic, MicOff, Check } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import {
+  Crown,
+  User,
+  Settings as SettingsIcon,
+  Globe,
+  Phone,
+  Mic,
+  MicOff,
+  Check,
+} from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 
 type PlanType = "free" | "premium";
@@ -19,53 +45,68 @@ const avatarOptions = [
   {
     id: "current",
     src: "https://images.unsplash.com/photo-1710997740246-75b30937dd6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwcG9ydHJhaXR8ZW58MXx8fHwxNzU2OTQwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato actual"
+    alt: "Gato actual",
   },
   {
     id: "orange",
     src: "https://images.unsplash.com/photo-1712592000997-ea7ccaeb9725?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvcmFuZ2UlMjB0YWJieSUyMGNhdHxlbnwxfHx8fDE3NTY5NzUxMzZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato naranja"
+    alt: "Gato naranja",
   },
   {
     id: "gray",
     src: "https://images.unsplash.com/photo-1689871404673-cc43adec4ae8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmF5JTIwa2l0dGVufGVufDF8fHx8MTc1NjkyNTgxNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato gris"
+    alt: "Gato gris",
   },
   {
     id: "black",
     src: "https://images.unsplash.com/photo-1657314310600-6a63e9ef1859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxibGFjayUyMGNhdCUyMHBvcnRyYWl0fGVufDF8fHx8MTc1Njk4MDU5NXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato negro"
+    alt: "Gato negro",
   },
   {
     id: "white",
     src: "https://images.unsplash.com/photo-1704947807029-c75381b64869?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMGZsdWZmeSUyMGNhdHxlbnwxfHx8fDE3NTY5NzUxMzd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato blanco"
+    alt: "Gato blanco",
   },
   {
     id: "siamese",
     src: "https://images.unsplash.com/photo-1568152950566-c1bf43f4ab28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzaWFtZXNlJTIwY2F0fGVufDF8fHx8MTc1Njk4MTczM3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato siamés"
-  }
+    alt: "Gato siamés",
+  },
 ];
 
-export function SettingsPage() {
+interface SettingsPageProps {
+  currentPlan: PlanType;
+  setCurrentPlan: (plan: PlanType) => void;
+  onNavigateToPremium: () => void;
+}
+
+export function SettingsPage({
+  currentPlan,
+  setCurrentPlan,
+  onNavigateToPremium,
+}: SettingsPageProps) {
   // Estados para ajustes de perfil
   const [fullName] = useState("Juan Pérez");
   const [email, setEmail] = useState("juan.perez@example.com");
-  const [address, setAddress] = useState("Calle Principal 123, Santiago, Chile");
+  const [address, setAddress] = useState(
+    "Calle Principal 123, Santiago, Chile",
+  );
   const [birthDate] = useState("1990-05-15");
   const [username, setUsername] = useState("felipe123");
-  const [currentAvatar, setCurrentAvatar] = useState(avatarOptions[0]);
-  const [selectedAvatar, setSelectedAvatar] = useState(avatarOptions[0]);
-  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-
-  // Estados para suscripción
-  const [currentPlan, setCurrentPlan] = useState<PlanType>("free");
+  const [currentAvatar, setCurrentAvatar] = useState(
+    avatarOptions[0],
+  );
+  const [selectedAvatar, setSelectedAvatar] = useState(
+    avatarOptions[0],
+  );
+  const [isAvatarModalOpen, setIsAvatarModalOpen] =
+    useState(false);
 
   // Estados para ajustes generales
   const [language, setLanguage] = useState("es");
   const [autoConnect, setAutoConnect] = useState(false);
-  const [confirmBeforeCall, setConfirmBeforeCall] = useState(true);
+  const [confirmBeforeCall, setConfirmBeforeCall] =
+    useState(true);
   const [defaultPseudonym, setDefaultPseudonym] = useState("");
   const [muteOnStart, setMuteOnStart] = useState(false);
 
@@ -82,7 +123,7 @@ export function SettingsPage() {
   const freeBenefits = [
     "Conexiones ilimitadas",
     "Llamadas básicas de voz",
-    "Perfil básico"
+    "Perfil básico",
   ];
 
   const premiumBenefits = [
@@ -91,7 +132,7 @@ export function SettingsPage() {
     "Funciones avanzadas de privacidad",
     "Soporte premium 24/7",
     "Sin anuncios",
-    "Historial de conversaciones"
+    "Historial de conversaciones",
   ];
 
   return (
@@ -100,7 +141,9 @@ export function SettingsPage() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold mb-2">Ajustes</h1>
-          <p className="text-gray-400">Configura tu experiencia en ConfessApps</p>
+          <p className="text-gray-400">
+            Configura tu experiencia en ConfessApps
+          </p>
         </div>
 
         {/* Ajustes de Perfil */}
@@ -117,7 +160,7 @@ export function SettingsPage() {
           <CardContent className="space-y-6">
             {/* Avatar */}
             <div className="flex items-center gap-4">
-              <div 
+              <div
                 className="w-16 h-16 rounded-full overflow-hidden border-2 border-orange-500/50 hover:border-orange-500 transition-colors relative group cursor-pointer"
                 onClick={handleAvatarClick}
               >
@@ -134,27 +177,40 @@ export function SettingsPage() {
                 </div>
               </div>
               <div>
-                <Label className="text-white">Foto de perfil</Label>
-                <p className="text-sm text-gray-400">Haz clic en tu avatar para cambiarlo</p>
+                <Label className="text-white">
+                  Foto de perfil
+                </Label>
+                <p className="text-sm text-gray-400">
+                  Haz clic en tu avatar para cambiarlo
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nombre Completo */}
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="text-white">Nombre Completo</Label>
+                <Label
+                  htmlFor="fullName"
+                  className="text-white"
+                >
+                  Nombre Completo
+                </Label>
                 <Input
                   id="fullName"
                   value={fullName}
                   disabled
                   className="bg-gray-800 border-gray-700 text-gray-400"
                 />
-                <p className="text-xs text-gray-500">No se puede modificar</p>
+                <p className="text-xs text-gray-500">
+                  No se puede modificar
+                </p>
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white">Email</Label>
+                <Label htmlFor="email" className="text-white">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -166,7 +222,9 @@ export function SettingsPage() {
 
               {/* Dirección */}
               <div className="space-y-2">
-                <Label htmlFor="address" className="text-white">Dirección</Label>
+                <Label htmlFor="address" className="text-white">
+                  Dirección
+                </Label>
                 <Input
                   id="address"
                   value={address}
@@ -177,7 +235,12 @@ export function SettingsPage() {
 
               {/* Fecha de Nacimiento */}
               <div className="space-y-2">
-                <Label htmlFor="birthDate" className="text-white">Fecha de Nacimiento</Label>
+                <Label
+                  htmlFor="birthDate"
+                  className="text-white"
+                >
+                  Fecha de Nacimiento
+                </Label>
                 <Input
                   id="birthDate"
                   type="date"
@@ -185,12 +248,19 @@ export function SettingsPage() {
                   disabled
                   className="bg-gray-800 border-gray-700 text-gray-400"
                 />
-                <p className="text-xs text-gray-500">No se puede modificar</p>
+                <p className="text-xs text-gray-500">
+                  No se puede modificar
+                </p>
               </div>
 
               {/* Nombre de Usuario */}
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="username" className="text-white">Nombre de Usuario</Label>
+                <Label
+                  htmlFor="username"
+                  className="text-white"
+                >
+                  Nombre de Usuario
+                </Label>
                 <Input
                   id="username"
                   value={username}
@@ -223,17 +293,27 @@ export function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-white">
-                  Plan {currentPlan === "free" ? "Gratuito" : "Premium"}
+                  Plan{" "}
+                  {currentPlan === "free"
+                    ? "Gratuito"
+                    : "Premium"}
                 </h3>
                 {currentPlan === "premium" && (
-                  <p className="text-sm text-gray-400">Activo hasta el 15 de septiembre 2025</p>
+                  <p className="text-sm text-gray-400">
+                    Activo hasta el 15 de septiembre 2025
+                  </p>
                 )}
               </div>
-              <Badge 
-                variant={currentPlan === "premium" ? "default" : "secondary"}
-                className={currentPlan === "premium" 
-                  ? "bg-gradient-to-r from-red-500 to-orange-500 text-white" 
-                  : "bg-gray-700 text-gray-300"
+              <Badge
+                variant={
+                  currentPlan === "premium"
+                    ? "default"
+                    : "secondary"
+                }
+                className={
+                  currentPlan === "premium"
+                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
+                    : "bg-gray-700 text-gray-300"
                 }
               >
                 {currentPlan === "free" ? "GRATIS" : "PREMIUM"}
@@ -242,10 +322,18 @@ export function SettingsPage() {
 
             {/* Beneficios del plan actual */}
             <div>
-              <h4 className="font-semibold text-white mb-3">Beneficios incluidos:</h4>
+              <h4 className="font-semibold text-white mb-3">
+                Beneficios incluidos:
+              </h4>
               <ul className="space-y-2">
-                {(currentPlan === "free" ? freeBenefits : premiumBenefits).map((benefit, index) => (
-                  <li key={index} className="flex items-center gap-2 text-gray-300">
+                {(currentPlan === "free"
+                  ? freeBenefits
+                  : premiumBenefits
+                ).map((benefit, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center gap-2 text-gray-300"
+                  >
                     <Check className="w-4 h-4 text-green-500" />
                     {benefit}
                   </li>
@@ -256,23 +344,26 @@ export function SettingsPage() {
             {/* Botones de acción */}
             <div className="flex gap-3">
               {currentPlan === "free" ? (
-                <Button 
+                <Button
                   className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
-                  onClick={() => setCurrentPlan("premium")}
+                  onClick={() => {
+                    setCurrentPlan("premium");
+                    onNavigateToPremium();
+                  }}
                 >
                   Mejorar a Premium
                 </Button>
               ) : (
                 <>
-                  <Button 
-                    variant="outline" 
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-gray-800"
                     onClick={() => setCurrentPlan("free")}
                   >
                     Administrar Suscripción
                   </Button>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     className="text-gray-400 hover:text-white hover:bg-gray-800"
                     onClick={() => setCurrentPlan("free")}
                   >
@@ -302,13 +393,26 @@ export function SettingsPage() {
                 <Globe className="w-4 h-4" />
                 Idioma de la aplicación
               </Label>
-              <Select value={language} onValueChange={setLanguage}>
+              <Select
+                value={language}
+                onValueChange={setLanguage}
+              >
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="es" className="text-white hover:bg-gray-700">Español</SelectItem>
-                  <SelectItem value="en" className="text-white hover:bg-gray-700">English</SelectItem>
+                  <SelectItem
+                    value="es"
+                    className="text-white hover:bg-gray-700"
+                  >
+                    Español
+                  </SelectItem>
+                  <SelectItem
+                    value="en"
+                    className="text-white hover:bg-gray-700"
+                  >
+                    English
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -321,14 +425,19 @@ export function SettingsPage() {
                 <Phone className="w-4 h-4" />
                 Preferencias de llamada
               </h4>
-              
+
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-white">Autoconexión</Label>
-                  <p className="text-sm text-gray-400">Conectarme automáticamente al encontrar un match</p>
+                  <Label className="text-white">
+                    Autoconexión
+                  </Label>
+                  <p className="text-sm text-gray-400">
+                    Conectarme automáticamente al encontrar un
+                    match
+                  </p>
                 </div>
-                <Switch 
-                  checked={autoConnect} 
+                <Switch
+                  checked={autoConnect}
                   onCheckedChange={setAutoConnect}
                   className="data-[state=checked]:bg-orange-500"
                 />
@@ -336,11 +445,15 @@ export function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-white">Confirmar antes de iniciar llamada</Label>
-                  <p className="text-sm text-gray-400">Mostrar un aviso antes de conectar</p>
+                  <Label className="text-white">
+                    Confirmar antes de iniciar llamada
+                  </Label>
+                  <p className="text-sm text-gray-400">
+                    Mostrar un aviso antes de conectar
+                  </p>
                 </div>
-                <Switch 
-                  checked={confirmBeforeCall} 
+                <Switch
+                  checked={confirmBeforeCall}
                   onCheckedChange={setConfirmBeforeCall}
                   className="data-[state=checked]:bg-orange-500"
                 />
@@ -357,12 +470,15 @@ export function SettingsPage() {
               <Input
                 id="pseudonym"
                 value={defaultPseudonym}
-                onChange={(e) => setDefaultPseudonym(e.target.value)}
+                onChange={(e) =>
+                  setDefaultPseudonym(e.target.value)
+                }
                 className="bg-gray-800 border-gray-700 text-white focus:border-orange-500"
                 placeholder="Ej: Oyente empático"
               />
               <p className="text-xs text-gray-400">
-                Se usará automáticamente si no escribes uno nuevo cada vez
+                Se usará automáticamente si no escribes uno
+                nuevo cada vez
               </p>
             </div>
 
@@ -370,18 +486,27 @@ export function SettingsPage() {
 
             {/* Privacidad en llamadas */}
             <div className="space-y-4">
-              <h4 className="font-semibold text-white">Privacidad en llamadas</h4>
-              
+              <h4 className="font-semibold text-white">
+                Privacidad en llamadas
+              </h4>
+
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-white flex items-center gap-2">
-                    {muteOnStart ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    {muteOnStart ? (
+                      <MicOff className="w-4 h-4" />
+                    ) : (
+                      <Mic className="w-4 h-4" />
+                    )}
                     Silenciar micrófono al iniciar
                   </Label>
-                  <p className="text-sm text-gray-400">Tu micrófono estará silenciado cuando comience la llamada</p>
+                  <p className="text-sm text-gray-400">
+                    Tu micrófono estará silenciado cuando
+                    comience la llamada
+                  </p>
                 </div>
-                <Switch 
-                  checked={muteOnStart} 
+                <Switch
+                  checked={muteOnStart}
                   onCheckedChange={setMuteOnStart}
                   className="data-[state=checked]:bg-orange-500"
                 />
@@ -395,12 +520,17 @@ export function SettingsPage() {
         </Card>
 
         {/* Avatar Selection Modal */}
-        <Dialog open={isAvatarModalOpen} onOpenChange={setIsAvatarModalOpen}>
+        <Dialog
+          open={isAvatarModalOpen}
+          onOpenChange={setIsAvatarModalOpen}
+        >
           <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-center text-white">Cambiar Avatar</DialogTitle>
+              <DialogTitle className="text-center text-white">
+                Cambiar Avatar
+              </DialogTitle>
             </DialogHeader>
-            
+
             <div className="py-4">
               <div className="grid grid-cols-3 gap-4 mb-6">
                 {avatarOptions.map((avatar) => (
@@ -408,8 +538,8 @@ export function SettingsPage() {
                     key={avatar.id}
                     className={`relative w-20 h-20 rounded-full overflow-hidden cursor-pointer border-2 transition-all duration-200 ${
                       selectedAvatar.id === avatar.id
-                        ? 'border-orange-500 ring-2 ring-orange-500 ring-opacity-50'
-                        : 'border-gray-600 hover:border-gray-500'
+                        ? "border-orange-500 ring-2 ring-orange-500 ring-opacity-50"
+                        : "border-gray-600 hover:border-gray-500"
                     }`}
                     onClick={() => setSelectedAvatar(avatar)}
                   >
@@ -428,7 +558,7 @@ export function SettingsPage() {
                   </div>
                 ))}
               </div>
-              
+
               <Button
                 onClick={handleSaveAvatar}
                 className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white border-none"

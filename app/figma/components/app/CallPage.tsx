@@ -20,7 +20,7 @@ interface CallPageProps {
 }
 
 export function CallPage({ onEndCall }: CallPageProps) {
-  const [is_over, setIsOver] = useState(false);
+  const [is_over, setIsOver] = useState(true);
 
   const handleEndCall = () => {
     setIsOver(true);
@@ -187,8 +187,8 @@ export function CallPage({ onEndCall }: CallPageProps) {
                 </Button>
                 <Button
                   onClick={handleFinalizeCall}
-                  variant="outline"
-                  className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
+                  variant="ghost"
+                  className="flex-1 text-white hover:bg-gray-800"
                 >
                   Finalizar
                 </Button>

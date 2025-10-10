@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Phone, MapPin, MessageCircle, Mail, Send, Globe } from "lucide-react";
+import { MessageCircle, Mail, Send, Globe } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -96,229 +96,194 @@ export function Contact() {
           </p>
         </div>
 
-        {/* Main Content - Two Columns */}
-        <div className="grid lg:grid-cols-2 gap-16">
-          {/* Left Column - Contact Form */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name Fields */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">Nombre</Label>
-                  <Input
-                    id="firstName"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    placeholder="Tu nombre"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Apellido</Label>
-                  <Input
-                    id="lastName"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    placeholder="Tu apellido"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="tu@email.com"
-                  required
-                />
-              </div>
-
-              {/* Phone */}
-              <div className="space-y-2">
-                <Label htmlFor="phone">Número de teléfono</Label>
-                <div className="flex gap-2">
-                  <Select value={formData.countryCode} onValueChange={(value) => handleInputChange('countryCode', value)}>
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="+56">+56</SelectItem>
-                      <SelectItem value="+1">+1</SelectItem>
-                      <SelectItem value="+34">+34</SelectItem>
-                      <SelectItem value="+52">+52</SelectItem>
-                      <SelectItem value="+54">+54</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="123456789"
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-
-              {/* Message */}
-              <div className="space-y-2">
-                <Label htmlFor="message">Mensaje</Label>
-                <Textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) => handleInputChange('message', e.target.value)}
-                  placeholder="Cuéntanos cómo podemos ayudarte..."
-                  rows={5}
-                  required
-                />
-              </div>
-
-              {/* Services */}
-              <div className="space-y-4">
-                <Label>Servicios de interés</Label>
+        {/* Main Content - Centered Layout */}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Left Column - Contact Form */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Name Fields */}
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="support"
-                        checked={formData.services.support}
-                        onCheckedChange={(checked) => handleServiceChange('support', checked as boolean)}
-                      />
-                      <Label htmlFor="support" className="text-sm">Soporte técnico</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="billing"
-                        checked={formData.services.billing}
-                        onCheckedChange={(checked) => handleServiceChange('billing', checked as boolean)}
-                      />
-                      <Label htmlFor="billing" className="text-sm">Facturación</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="media"
-                        checked={formData.services.media}
-                        onCheckedChange={(checked) => handleServiceChange('media', checked as boolean)}
-                      />
-                      <Label htmlFor="media" className="text-sm">Prensa y medios</Label>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">Nombre</Label>
+                    <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) => handleInputChange('firstName', e.target.value)}
+                      placeholder="Tu nombre"
+                      required
+                    />
                   </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="technical"
-                        checked={formData.services.technical}
-                        onCheckedChange={(checked) => handleServiceChange('technical', checked as boolean)}
-                      />
-                      <Label htmlFor="technical" className="text-sm">Consulta técnica</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="partnership"
-                        checked={formData.services.partnership}
-                        onCheckedChange={(checked) => handleServiceChange('partnership', checked as boolean)}
-                      />
-                      <Label htmlFor="partnership" className="text-sm">Alianzas</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="other"
-                        checked={formData.services.other}
-                        onCheckedChange={(checked) => handleServiceChange('other', checked as boolean)}
-                      />
-                      <Label htmlFor="other" className="text-sm">Otros</Label>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Apellido</Label>
+                    <Input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) => handleInputChange('lastName', e.target.value)}
+                      placeholder="Tu apellido"
+                      required
+                    />
                   </div>
                 </div>
-              </div>
 
-              {/* Submit Button */}
-              <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white">
-                <Send className="w-4 h-4 mr-2" />
-                Enviar mensaje
-              </Button>
-            </form>
-          </div>
-
-          {/* Right Column - Contact Options */}
-          <div className="space-y-8">
-            {/* Chat Section */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-emerald-600" />
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Correo electrónico</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="tu@email.com"
+                    required
+                  />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900">Chatea con nosotros</h3>
-              </div>
-              <p className="text-slate-600 mb-4">
-                Obtén respuestas rápidas a través de nuestros canales de chat.
-              </p>
-              <div className="space-y-3">
-                <a 
-                  href="#" 
-                  className="flex items-center gap-3 text-rose-600 hover:text-rose-700 transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Iniciar un chat en vivo</span>
-                </a>
-                <a 
-                  href="mailto:contacto@confessapps.com" 
-                  className="flex items-center gap-3 text-rose-600 hover:text-rose-700 transition-colors"
-                >
-                  <Mail className="w-4 h-4" />
-                  <span>Enviar un correo electrónico</span>
-                </a>
-                <a 
-                  href="#" 
-                  className="flex items-center gap-3 text-rose-600 hover:text-rose-700 transition-colors"
-                >
-                  <Globe className="w-4 h-4" />
-                  <span>Mensaje en X</span>
-                </a>
-              </div>
+
+                {/* Phone */}
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Número de teléfono</Label>
+                  <div className="flex gap-2">
+                    <Select value={formData.countryCode} onValueChange={(value) => handleInputChange('countryCode', value)}>
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="+56">+56</SelectItem>
+                        <SelectItem value="+1">+1</SelectItem>
+                        <SelectItem value="+34">+34</SelectItem>
+                        <SelectItem value="+52">+52</SelectItem>
+                        <SelectItem value="+54">+54</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="123456789"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div className="space-y-2">
+                  <Label htmlFor="message">Mensaje</Label>
+                  <Textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={(e) => handleInputChange('message', e.target.value)}
+                    placeholder="Cuéntanos cómo podemos ayudarte..."
+                    rows={5}
+                    required
+                  />
+                </div>
+
+                {/* Services */}
+                <div className="space-y-4">
+                  <Label>Servicios de interés</Label>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="support"
+                          checked={formData.services.support}
+                          onCheckedChange={(checked) => handleServiceChange('support', checked as boolean)}
+                        />
+                        <Label htmlFor="support" className="text-sm">Soporte técnico</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="billing"
+                          checked={formData.services.billing}
+                          onCheckedChange={(checked) => handleServiceChange('billing', checked as boolean)}
+                        />
+                        <Label htmlFor="billing" className="text-sm">Facturación</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="media"
+                          checked={formData.services.media}
+                          onCheckedChange={(checked) => handleServiceChange('media', checked as boolean)}
+                        />
+                        <Label htmlFor="media" className="text-sm">Prensa y medios</Label>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="technical"
+                          checked={formData.services.technical}
+                          onCheckedChange={(checked) => handleServiceChange('technical', checked as boolean)}
+                        />
+                        <Label htmlFor="technical" className="text-sm">Consulta técnica</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="partnership"
+                          checked={formData.services.partnership}
+                          onCheckedChange={(checked) => handleServiceChange('partnership', checked as boolean)}
+                        />
+                        <Label htmlFor="partnership" className="text-sm">Alianzas</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="other"
+                          checked={formData.services.other}
+                          onCheckedChange={(checked) => handleServiceChange('other', checked as boolean)}
+                        />
+                        <Label htmlFor="other" className="text-sm">Otros</Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button type="submit" className="w-full bg-rose-600 hover:bg-rose-700 text-white">
+                  <Send className="w-4 h-4 mr-2" />
+                  Enviar mensaje
+                </Button>
+              </form>
             </div>
 
-            {/* Call Section */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center">
-                  <Phone className="w-5 h-5 text-rose-600" />
+            {/* Right Column - Contact Options */}
+            <div className="flex flex-col justify-center">
+              {/* Chat Section */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <MessageCircle className="w-6 h-6 text-emerald-600" />
+                  </div>
+                  <h3 className="text-2xl font-semibold text-slate-900">Chatea con nosotros</h3>
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900">Llámanos</h3>
-              </div>
-              <p className="text-slate-600 mb-4">
-                Estamos disponibles de lunes a viernes de 9:00 AM a 6:00 PM (GMT-3).
-              </p>
-              <a 
-                href="tel:+56223456789" 
-                className="flex items-center gap-3 text-rose-600 hover:text-rose-700 transition-colors"
-              >
-                <Phone className="w-4 h-4" />
-                <span>+56 2 2345 6789</span>
-              </a>
-            </div>
-
-            {/* Visit Section */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-slate-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-slate-900">Visítanos</h3>
-              </div>
-              <p className="text-slate-600 mb-4">
-                Puedes visitarnos en nuestras oficinas con cita previa.
-              </p>
-              <div className="flex items-start gap-3 text-slate-700">
-                <MapPin className="w-4 h-4 mt-1 text-slate-500" />
-                <div>
-                  <p>Av. Providencia 1234, Piso 8</p>
-                  <p>Providencia, Santiago</p>
-                  <p>Chile</p>
+                <p className="text-slate-600 mb-6 text-lg">
+                  Obtén respuestas rápidas a través de nuestros canales de comunicación directa.
+                </p>
+                <div className="space-y-4">
+                  <a 
+                    href="mailto:contacto@confessapps.com" 
+                    className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-slate-100 transition-all duration-200"
+                  >
+                    <Mail className="w-5 h-5" />
+                    <span className="font-medium">Enviar un correo electrónico</span>
+                  </a>
+                  <a 
+                    href="https://x.com" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-slate-100 transition-all duration-200"
+                  >
+                    <Globe className="w-5 h-5" />
+                    <span className="font-medium">Mensaje en X</span>
+                  </a>
+                  <a 
+                    href="https://wa.me" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-slate-100 transition-all duration-200"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    <span className="font-medium">Iniciar un chat en WhatsApp</span>
+                  </a>
                 </div>
               </div>
             </div>

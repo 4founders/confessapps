@@ -1,7 +1,11 @@
 import { Button } from "./ui/button";
 import { Users } from "lucide-react";
 
-export function CallToAction() {
+interface CallToActionProps {
+  onNavigate?: (page: string) => void;
+}
+
+export function CallToAction({ onNavigate }: CallToActionProps) {
   return (
     <section className="min-h-screen bg-gradient-to-r from-rose-600 via-pink-600 to-orange-500 flex items-center justify-center">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -18,6 +22,7 @@ export function CallToAction() {
         
         <Button 
           size="lg"
+          onClick={() => onNavigate?.("auth")}
           className="bg-white text-rose-600 hover:bg-rose-50 px-8 py-4 text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300"
         >
           Únete a la comunidad

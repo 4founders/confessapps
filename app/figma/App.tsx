@@ -9,6 +9,7 @@ import { Auth } from "./components/Auth";
 import { Pricing } from "./components/Pricing";
 import { Contact } from "./components/Contact";
 import { HealthAnnouncements } from "./components/HealthAnnouncements";
+import { TermsAndConditions } from "./components/TermsAndConditions";
 import { AppLayout } from "./components/AppLayout";
 
 type AppState =
@@ -17,11 +18,12 @@ type AppState =
   | "pricing"
   | "contact"
   | "health-announcements"
+  | "terms"
   | "app";
 
 export default function App() {
   const [currentPage, setCurrentPage] =
-    useState<AppState>("app");
+    useState<AppState>("landing");
 
   const handleNavigation = (page: string) => {
     setCurrentPage(page as AppState);
@@ -43,9 +45,9 @@ export default function App() {
           onNavigate={handleNavigation}
         />
         <main>
-          <Pricing />
+          <Pricing onNavigate={handleNavigation} />
         </main>
-        <Footer />
+        <Footer onNavigate={handleNavigation} />
       </div>
     );
   }
@@ -60,7 +62,7 @@ export default function App() {
         <main>
           <Contact />
         </main>
-        <Footer />
+        <Footer onNavigate={handleNavigation} />
       </div>
     );
   }
@@ -75,9 +77,13 @@ export default function App() {
         <main>
           <HealthAnnouncements />
         </main>
-        <Footer />
+        <Footer onNavigate={handleNavigation} />
       </div>
     );
+  }
+
+  if (currentPage === "terms") {
+    return <TermsAndConditions onNavigate={handleNavigation} />;
   }
 
   return (
@@ -87,12 +93,12 @@ export default function App() {
         onNavigate={handleNavigation}
       />
       <main>
-        <Hero />
+        <Hero onNavigate={handleNavigation} />
         <WhyChooseUs />
         <HowItWorks />
-        <CallToAction />
+        <CallToAction onNavigate={handleNavigation} />
       </main>
-      <Footer />
+      <Footer onNavigate={handleNavigation} />
     </div>
   );
 }

@@ -1,6 +1,10 @@
 import { Button } from "./ui/button";
 
-export function Hero() {
+interface HeroProps {
+  onNavigate?: (page: string) => void;
+}
+
+export function Hero({ onNavigate }: HeroProps) {
   return (
     <section className="relative bg-gradient-to-br from-rose-50 via-pink-50 to-orange-50 pt-16 pb-20 sm:pt-24 sm:pb-28 overflow-hidden">
       {/* Brand Patterns */}
@@ -100,6 +104,7 @@ export function Hero() {
           {/* Botón principal */}
           <Button 
             size="lg" 
+            onClick={() => onNavigate?.("auth")}
             className="bg-rose-600 hover:bg-rose-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
             Comienza gratis hoy
