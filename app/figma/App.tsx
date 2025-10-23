@@ -11,6 +11,7 @@ import { Contact } from "./components/Contact";
 import { HealthAnnouncements } from "./components/HealthAnnouncements";
 import { TermsAndConditions } from "./components/TermsAndConditions";
 import { AppLayout } from "./components/AppLayout";
+import { Toaster } from "./components/ui/sonner";
 
 type AppState =
   | "landing"
@@ -23,14 +24,19 @@ type AppState =
 
 export default function App() {
   const [currentPage, setCurrentPage] =
-    useState<AppState>("landing");
+    useState<AppState>("app");
 
   const handleNavigation = (page: string) => {
     setCurrentPage(page as AppState);
   };
 
   if (currentPage === "app") {
-    return <AppLayout onNavigate={handleNavigation} />;
+    return (
+      <>
+        <AppLayout onNavigate={handleNavigation} />
+        <Toaster />
+      </>
+    );
   }
 
   if (currentPage === "auth") {

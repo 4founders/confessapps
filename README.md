@@ -15,6 +15,7 @@ npm i resultado_paso_2
 4. Ejecutar
 ```bash
 node remove-version.js
+node remove-version-components  .js
 ```
 5. Ejecutar
 ```bash

@@ -20,12 +20,13 @@ export function Summary({ billingCycle, onBack, onProceedToPayment, onCancel }: 
 
   const premiumPriceMonthly = 7990;
   const premiumPriceAnnual = Math.round(premiumPriceMonthly * 0.65); // 35% discount
-  const annualSavings = premiumPriceMonthly - premiumPriceAnnual;
+  const annualSavingsPerMonth = premiumPriceMonthly - premiumPriceAnnual;
 
   const currentPrice = selectedBillingCycle === 'monthly' ? premiumPriceMonthly : premiumPriceAnnual;
-  const basePrice = currentPrice;
+  const basePrice = selectedBillingCycle === 'monthly' ? premiumPriceMonthly : premiumPriceMonthly * 12;
+  const annualSavings = selectedBillingCycle === 'annual' ? annualSavingsPerMonth * 12 : 0;
   const discountAmount = appliedDiscount ? Math.round(basePrice * (appliedDiscount.percentage / 100)) : 0;
-  const subtotal = basePrice - discountAmount;
+  const subtotal = basePrice - annualSavings - discountAmount;
   const total = subtotal;
 
   const formatPrice = (price: number) => {
@@ -177,7 +178,7 @@ export function Summary({ billingCycle, onBack, onProceedToPayment, onCancel }: 
                 {/* Price Breakdown */}
                 <div className="space-y-3">
                   <div className="flex justify-between text-gray-300">
-                    <span>Plan Premium ({selectedBillingCycle === 'monthly' ? 'mensual' : 'anual'})</span>
+                    <span>Plan Premium{selectedBillingCycle === 'monthly' ? ' (mensual)' : ''}</span>
                     <span>{formatPrice(basePrice)}</span>
                   </div>
                   

@@ -21,7 +21,7 @@ export function Auth({ onNavigate }: AuthProps) {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState(false);
-  const [registerError, setRegisterError] = useState('');
+  const [registerError, setRegisterError] = useState<string[]>([]);
   const [registerEmailSent, setRegisterEmailSent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -42,7 +42,9 @@ export function Auth({ onNavigate }: AuthProps) {
       const form = e.target as HTMLFormElement;
       const email = (form.elements.namedItem('email') as HTMLInputElement).value;
       const password = (form.elements.namedItem('password') as HTMLInputElement).value;
-      
+
+      /* 
+      %%%%%%%%%%%%%%% SIMULACIÓN DE LOGIN - DEJARLO ASÍ CUANDO SE ESTE EN FIGMA %%%%%%%%%%%%%%%%%
       // Simular validación con timeout de 2 segundos
       setTimeout(() => {
         if (email === 'contacto@confessapps.com' && password === '12345678') {
@@ -55,31 +57,111 @@ export function Auth({ onNavigate }: AuthProps) {
           setLoginError(true);
         }
       }, 2000);
+      %%%%%%%%%%%%%%% FIN SIMULACIÓN DE LOGIN %%%%%%%%%%%%%%%%%
+      */
+
+
+      //%%%%%%%%%% CODIGO REAL DE LOGIN %%%%%%%%%%%%%%%
+      fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+      .then(res => {
+        // Si la respuesta fue exitosa y el navegador siguió una redirección...
+        if (res.ok && res.redirected) {
+          // ...forzamos la navegación del cliente a la URL final.
+          window.location.href = res.url;
+          return; // No es necesario seguir procesando.
+        }
+
+        // Si la respuesta no fue exitosa (ej. credenciales incorrectas).
+        if (!res.ok) {
+          return res.json().then(errorData => {
+            setLoginError(true);
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Error en la petición de login:", error);
+        setLoginError(true);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+      //%%%%%%%%%% FIN CODIGO REAL DE LOGIN %%%%%%%%%%%%%%%
+      
       
       return;
     }
     
     if (authState === 'register') {
       // Limpiar error previo
-      setRegisterError('');
+      setRegisterError([]);
       setIsLoading(true);
       
       // Obtener valores del formulario
       const form = e.target as HTMLFormElement;
+      const username = (form.elements.namedItem('username') as HTMLInputElement).value;
+      const birthdate = (form.elements.namedItem('birthdate') as HTMLInputElement).value;
+      const gender = (form.elements.namedItem('gender') as HTMLSelectElement).value;
+      const country = (form.elements.namedItem('country') as HTMLSelectElement).value;
+      const language = (form.elements.namedItem('language') as HTMLSelectElement).value;
       const email = (form.elements.namedItem('email') as HTMLInputElement).value;
+      const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+      const confirmPassword = (form.elements.namedItem('confirmPassword') as HTMLInputElement).value;
+
+
+      console.log("datos del usuario: ", {username, birthdate, gender, country, language, email, password, confirmPassword})
       
-      // Simular validación con timeout de 2 segundos
+
+      //%%%%%%%%%%%%%%% SIMULACIÓN DE REGISTRO - DEJARLO ASÍ CUANDO SE ESTE EN FIGMA %%%%%%%%%%%%%%%%%
+      /* // Simular validación con timeout de 2 segundos
       setTimeout(() => {
         if (email === 'contacto@confessapps.com') {
           // Email ya registrado - mostrar error
           setIsLoading(false);
-          setRegisterError('Correo electronico ya registrado');
+          setRegisterError(['Correo electronico ya registrado']);
         } else {
           // Email válido - mostrar mensaje de confirmación
           setIsLoading(false);
           setRegisterEmailSent(true);
         }
       }, 2000);
+       */
+      //%%%%%%%%%%%%%%% FIN SIMULACIÓN DE REGISTRO %%%%%%%%%%%%%%%%%
+
+      //%%%%%%%%%% CODIGO REAL DE REGISTRO %%%%%%%%%%%%%%%
+      fetch('/api/auth/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, birthdate, gender, country, language, email, password, confirmPassword }),
+      })
+      .then(res => {
+        if (res.ok && res.redirected) {
+          window.location.href = res.url;
+          return;
+        }
+        if (!res.ok) {
+          return res.json().then(errorData => {
+            // Verificamos que `errors` sea un arreglo antes de mapearlo
+            if (errorData && Array.isArray(errorData.errors)) {
+              const errorMessages = errorData.errors.map((err: { message: string }) => err.message);
+              setRegisterError(errorMessages);
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Error en la petición de registro:", error);
+        setRegisterError(["Ocurrió un error inesperado. Por favor, inténtalo de nuevo."]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+      //%%%%%%%%%% FIN CODIGO REAL DE REGISTRO %%%%%%%%%%%%%%%
       
       return;
     }
@@ -94,7 +176,7 @@ export function Auth({ onNavigate }: AuthProps) {
     setRegisterEmailSent(false);
     // Limpiar errores cuando cambiamos de vista
     setLoginError(false);
-    setRegisterError('');
+    setRegisterError([]);
     setTimeout(() => {
       setAuthState(newState);
       setTimeout(() => {
@@ -115,8 +197,8 @@ export function Auth({ onNavigate }: AuthProps) {
     };
 
     const clearRegisterError = () => {
-      if (registerError) {
-        setRegisterError('');
+      if (registerError.length > 0) {
+        setRegisterError([]);
       }
     };
     
@@ -304,8 +386,12 @@ export function Auth({ onNavigate }: AuthProps) {
               <div className="space-y-2">
                 <h1 className="text-2xl font-bold text-slate-900">Crear Cuenta</h1>
                 <p className="text-slate-600">Únete a nuestra comunidad de apoyo</p>
-                {registerError && (
-                  <p className="text-red-600 text-sm font-medium">{registerError}</p>
+                {registerError.length > 0 && (
+                  <div className="space-y-1 pt-1">
+                    {registerError.map((error, index) => (
+                      <p key={index} className="text-red-600 text-sm font-medium">{error}</p>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
@@ -346,11 +432,12 @@ export function Auth({ onNavigate }: AuthProps) {
               ) : authState === 'register' && !registerEmailSent ? (
                 <>
                   <div className="space-y-1">
-                    <Label htmlFor="name">Nombre completo</Label>
+                    <Label htmlFor="username">Nombre de usuario</Label>
                     <Input
-                      id="name"
+                      id="username"
+                      name='username'
                       type="text"
-                      placeholder="Ingresa tu nombre"
+                      placeholder="Ingresa tu nombre de usuario"
                       required
                       className="h-10 bg-white border-slate-300 focus:border-rose-500 focus:ring-rose-500 transition-colors"
                     />
@@ -361,6 +448,7 @@ export function Auth({ onNavigate }: AuthProps) {
                       <Label htmlFor="birthdate">Fecha de nacimiento</Label>
                       <Input
                         id="birthdate"
+                        name='birthdate'
                         type="date"
                         required
                         className="h-10 bg-white border-slate-300 focus:border-rose-500 focus:ring-rose-500 transition-colors"
@@ -369,7 +457,7 @@ export function Auth({ onNavigate }: AuthProps) {
 
                     <div className="space-y-1">
                       <Label htmlFor="gender">Género</Label>
-                      <Select required>
+                      <Select required name="gender">
                         <SelectTrigger className="h-10 bg-white border-slate-300 focus:border-rose-500 focus:ring-rose-500 transition-colors">
                           <SelectValue placeholder="Seleccionar" />
                         </SelectTrigger>
@@ -387,7 +475,7 @@ export function Auth({ onNavigate }: AuthProps) {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label htmlFor="country">País</Label>
-                      <Select required>
+                      <Select required name="country">
                         <SelectTrigger className="h-10 bg-white border-slate-300 focus:border-rose-500 focus:ring-rose-500 transition-colors">
                           <SelectValue placeholder="Seleccionar país" />
                         </SelectTrigger>
@@ -403,7 +491,7 @@ export function Auth({ onNavigate }: AuthProps) {
 
                     <div className="space-y-1">
                       <Label htmlFor="language">Idioma</Label>
-                      <Select required>
+                      <Select required name="language">
                         <SelectTrigger className="h-10 bg-white border-slate-300 focus:border-rose-500 focus:ring-rose-500 transition-colors">
                           <SelectValue placeholder="Seleccionar idioma" />
                         </SelectTrigger>
@@ -442,6 +530,7 @@ export function Auth({ onNavigate }: AuthProps) {
                     <Label htmlFor="email">Correo electrónico</Label>
                     <Input
                       id="email"
+                      name="email"
                       type="email"
                       placeholder="correo@ejemplo.com"
                       required
@@ -455,6 +544,7 @@ export function Auth({ onNavigate }: AuthProps) {
                       <div className="relative">
                         <Input
                           id="password"
+                          name="password"
                           type={showPassword ? 'text' : 'password'}
                           placeholder="••••••••"
                           required
@@ -477,6 +567,7 @@ export function Auth({ onNavigate }: AuthProps) {
                       <div className="relative">
                         <Input
                           id="confirmPassword"
+                          name="confirmPassword"
                           type={showConfirmPassword ? 'text' : 'password'}
                           placeholder="••••••••"
                           required

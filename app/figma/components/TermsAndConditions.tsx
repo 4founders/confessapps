@@ -1,5 +1,13 @@
 import { ConfessAppsLogo } from "./ConfessAppsLogo";
 import { ScrollArea } from "./ui/scroll-area";
+import { Sumario } from "./terms/Sumario";
+import { Valores } from "./terms/Valores";
+import { Privacidad } from "./terms/Privacidad";
+import { TerminosDeUso } from "./terms/TerminosDeUso";
+import { PropiedadIntelectual } from "./terms/PropiedadIntelectual";
+import { Responsabilidades } from "./terms/Responsabilidades";
+import { Modificaciones } from "./terms/Modificaciones";
+import { Contacto } from "./terms/Contacto";
 
 const topics = [
   "Sumario",
@@ -41,92 +49,21 @@ export function TermsAndConditions({
   const renderTopicContent = (topic: string) => {
     switch (topic) {
       case "Sumario":
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl text-white mb-8">
-              Sumario
-            </h1>
-
-            <div className="space-y-4 text-gray-300 leading-relaxed">
-              <p>
-                Bienvenido a ConfessApps, una plataforma
-                diseñada para conectar a personas que necesitan
-                desahogarse con aquellas que disfrutan escuchar
-                y brindar apoyo emocional. Nuestro servicio
-                facilita conexiones aleatorias por llamada de
-                voz en un ambiente seguro y confidencial.
-              </p>
-
-              {/* <p>
-                Al utilizar ConfessApps, usted acepta cumplir con estos Términos y Condiciones, así como con todas 
-                las políticas aquí contenidas. Es importante que lea detenidamente todos los términos antes de 
-                utilizar nuestros servicios.
-              </p>
-
-              <h3 className="text-xl text-white mt-8 mb-4">Aspectos Clave de Nuestro Servicio:</h3>
-              
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>
-                  <strong className="text-orange-400">Conexiones Anónimas:</strong> Las conversaciones se realizan 
-                  de forma anónima para proteger la privacidad de nuestros usuarios.
-                </li>
-                <li>
-                  <strong className="text-orange-400">Dos Roles:</strong> Los usuarios pueden elegir entre ser 
-                  "oyentes" (quienes escuchan) o "hablantes" (quienes necesitan desahogarse).
-                </li>
-                <li>
-                  <strong className="text-orange-400">Moderación Activa:</strong> Mantenemos un sistema de 
-                  moderación para garantizar un ambiente seguro y respetuoso.
-                </li>
-                <li>
-                  <strong className="text-orange-400">Confidencialidad:</strong> Todo lo compartido en las 
-                  conversaciones debe mantenerse confidencial entre los participantes.
-                </li>
-              </ul>
-
-              <h3 className="text-xl text-white mt-8 mb-4">Responsabilidades del Usuario:</h3>
-              
-              <p>
-                Al usar ConfessApps, usted se compromete a:
-              </p>
-              
-              <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Tratar a otros usuarios con respeto y empatía</li>
-                <li>No compartir información personal propia o de otros</li>
-                <li>Reportar cualquier comportamiento inapropiado</li>
-                <li>No usar el servicio para fines comerciales o promocionales</li>
-                <li>Cumplir con todas las leyes aplicables en su jurisdicción</li>
-              </ul>
-
-              <h3 className="text-xl text-white mt-8 mb-4">Limitaciones y Advertencias:</h3>
-              
-              <p>
-                ConfessApps es un servicio de apoyo emocional entre pares y no sustituye la atención médica 
-                profesional. En casos de crisis de salud mental, emergencias médicas o pensamientos suicidas, 
-                recomendamos contactar inmediatamente a los servicios de emergencia locales o profesionales 
-                de la salud mental.
-              </p>
-
-              <p>
-                El servicio se proporciona "tal como está" y no garantizamos la disponibilidad continua, 
-                la compatibilidad con todos los dispositivos, o resultados específicos del uso de la plataforma.
-              </p>
-
-              <h3 className="text-xl text-white mt-8 mb-4">Modificaciones:</h3>
-              
-              <p>
-                Nos reservamos el derecho de modificar estos términos en cualquier momento. Los usuarios serán 
-                notificados de cambios significativos y el uso continuado del servicio constituye la aceptación 
-                de los nuevos términos.
-              </p> */}
-
-              <p className="mt-8 text-sm text-gray-400">
-                <strong>Fecha de última actualización:</strong>{" "}
-                1 de octubre de 2025
-              </p>
-            </div>
-          </div>
-        );
+        return <Sumario />;
+      case "Valores":
+        return <Valores />;
+      case "Política de Privacidad y Seguridad de Datos":
+        return <Privacidad />;
+      case "Uso del Sitio y de la App y su Propiedad":
+        return <TerminosDeUso />;
+      case "Propiedad del Contenido":
+        return <PropiedadIntelectual />;
+      case "Exclusión de Garantías y de Responsabilidad":
+        return <Responsabilidades />;
+      case "Modificaciones de Términos":
+        return <Modificaciones />;
+      case "Aviso Legal":
+        return <Contacto />;
       default:
         return (
           <div className="space-y-6">
@@ -150,17 +87,15 @@ export function TermsAndConditions({
         <div className="p-6 border-b border-gray-800 flex-shrink-0">
           <button
             onClick={() => onNavigate("landing")}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
           >
-            <ConfessAppsLogo className="w-10 h-10" />
-            <div className="text-left">
-              <span className="text-white text-xl">
-                Confess
-              </span>
-              <span className="text-orange-500 text-xl">
+            <ConfessAppsLogo className="w-8 h-8 object-contain" />
+            <span className="text-xl font-semibold">
+              <span className="text-white">Confess</span>
+              <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
                 Apps
               </span>
-            </div>
+            </span>
           </button>
         </div>
 

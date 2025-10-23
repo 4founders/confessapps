@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { toast } from "sonner";
 
 interface CallPageProps {
   onEndCall: () => void;
@@ -21,25 +22,37 @@ interface CallPageProps {
 
 export function CallPage({ onEndCall }: CallPageProps) {
   const [is_over, setIsOver] = useState(true);
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [showSOSMenu, setShowSOSMenu] = useState(false);
 
   const handleEndCall = () => {
     setIsOver(true);
   };
 
   const handleSOS = () => {
-    alert("Función SOS activada - En desarrollo");
+    setShowSOSMenu(!showSOSMenu);
+  };
+
+  const handleSOSOption = (option: string) => {
+    setShowSOSMenu(false);
+    toast.success("Su advertencia ha sido recibida con éxito", {
+      position: "top-center",
+      duration: 3000,
+    });
   };
 
   const handleToggleMute = () => {
-    alert("Función de mutear - En desarrollo");
+    setIsMuted(!isMuted);
   };
 
   const handleToggleAudio = () => {
-    alert("Función de audio - En desarrollo");
+    setIsAudioEnabled(!isAudioEnabled);
   };
 
   const handleSpeak = () => {
-    alert("Función de hablar - En desarrollo");
+    // TODO: Implement speak functionality
+    console.log("Speak button clicked");
   };
 
   const handleContinueCall = () => {
@@ -101,7 +114,7 @@ export function CallPage({ onEndCall }: CallPageProps) {
 
       {/* Control Buttons */}
       <div className="p-6 bg-gray-900 border-t border-gray-800">
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center space-x-4 relative">
           {/* Hang Up Button */}
           <Button
             onClick={handleEndCall}
@@ -110,26 +123,54 @@ export function CallPage({ onEndCall }: CallPageProps) {
             <PhoneOff className="w-6 h-6" />
           </Button>
 
-          {/* Speak Button */}
+          {/* Speak Button - Hidden */}
           <Button
             onClick={handleSpeak}
-            className="w-14 h-14 rounded-full bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center p-0"
+            className="w-14 h-14 rounded-full bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center p-0 hidden"
           >
             <MessageSquare className="w-6 h-6" />
           </Button>
 
-          {/* SOS Button */}
-          <Button
-            onClick={handleSOS}
-            className="w-14 h-14 rounded-full bg-yellow-600 hover:bg-yellow-700 text-white flex items-center justify-center p-0"
-          >
-            <AlertTriangle className="w-6 h-6" />
-          </Button>
+          {/* SOS Button with Dropdown Menu */}
+          <div className="relative">
+            {showSOSMenu && (
+              <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-lg shadow-lg border border-gray-700 py-2 min-w-[280px] z-50">
+                <button
+                  onClick={() => handleSOSOption("Compañero en peligro")}
+                  className="w-full text-left px-4 py-3 text-white hover:bg-gray-700 transition-colors text-sm"
+                >
+                  Compañero en peligro
+                </button>
+                <button
+                  onClick={() => handleSOSOption("Compañero no respeta su rol")}
+                  className="w-full text-left px-4 py-3 text-white hover:bg-gray-700 transition-colors text-sm"
+                >
+                  Compañero no respeta su rol
+                </button>
+                <button
+                  onClick={() => handleSOSOption("Compañero realiza actividad inadecuada")}
+                  className="w-full text-left px-4 py-3 text-white hover:bg-gray-700 transition-colors text-sm"
+                >
+                  Compañero realiza actividad inadecuada
+                </button>
+              </div>
+            )}
+            <Button
+              onClick={handleSOS}
+              className="w-14 h-14 rounded-full bg-yellow-600 hover:bg-yellow-700 text-white flex items-center justify-center p-0"
+            >
+              <AlertTriangle className="w-6 h-6" />
+            </Button>
+          </div>
 
           {/* Audio Button */}
           <Button
             onClick={handleToggleAudio}
-            className="w-14 h-14 rounded-full bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center p-0"
+            className={`w-14 h-14 rounded-full ${
+              isAudioEnabled 
+                ? 'bg-gray-500 hover:bg-gray-600' 
+                : 'bg-gray-700 hover:bg-gray-600'
+            } text-white flex items-center justify-center p-0`}
           >
             <Headphones className="w-6 h-6" />
           </Button>
@@ -137,7 +178,11 @@ export function CallPage({ onEndCall }: CallPageProps) {
           {/* Mute Button */}
           <Button
             onClick={handleToggleMute}
-            className="w-14 h-14 rounded-full bg-gray-700 hover:bg-gray-600 text-white flex items-center justify-center p-0"
+            className={`w-14 h-14 rounded-full ${
+              isMuted 
+                ? 'bg-gray-500 hover:bg-gray-600' 
+                : 'bg-gray-700 hover:bg-gray-600'
+            } text-white flex items-center justify-center p-0`}
           >
             <MicOff className="w-6 h-6" />
           </Button>
@@ -148,7 +193,7 @@ export function CallPage({ onEndCall }: CallPageProps) {
           <span className="text-xs text-gray-400 w-14 text-center">
             Colgar
           </span>
-          <span className="text-xs text-gray-400 w-14 text-center">
+          <span className="text-xs text-gray-400 w-14 text-center hidden">
             Hablar
           </span>
           <span className="text-xs text-gray-400 w-14 text-center">

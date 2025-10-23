@@ -74,6 +74,7 @@
   :root, :host {
     --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --color-red-200: oklch(.885 .062 18.334);
     --color-red-500: oklch(.637 .237 25.331);
     --color-red-600: oklch(.577 .245 27.325);
     --color-red-700: oklch(.505 .213 27.518);
@@ -708,6 +709,10 @@
     bottom: calc(var(--spacing) * 40);
   }
 
+  .bottom-full {
+    bottom: 100%;
+  }
+
   .-left-12 {
     left: calc(var(--spacing) * -12);
   }
@@ -824,10 +829,6 @@
     margin-top: calc(var(--spacing) * 6);
   }
 
-  .mt-8 {
-    margin-top: calc(var(--spacing) * 8);
-  }
-
   .mt-12 {
     margin-top: calc(var(--spacing) * 12);
   }
@@ -882,10 +883,6 @@
 
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
-  }
-
-  .ml-4 {
-    margin-left: calc(var(--spacing) * 4);
   }
 
   .block {
@@ -1224,6 +1221,10 @@
     min-width: 8rem;
   }
 
+  .min-w-\[280px\] {
+    min-width: 280px;
+  }
+
   .min-w-\[var\(--radix-select-trigger-width\)\] {
     min-width: var(--radix-select-trigger-width);
   }
@@ -1350,14 +1351,6 @@
 
   .scroll-my-1 {
     scroll-margin-block: calc(var(--spacing) * 1);
-  }
-
-  .list-inside {
-    list-style-position: inside;
-  }
-
-  .list-disc {
-    list-style-type: disc;
   }
 
   .auto-rows-min {
@@ -1701,6 +1694,16 @@
     border-color: var(--color-red-500);
   }
 
+  .border-red-500\/30 {
+    border-color: color-mix(in srgb, oklch(.637 .237 25.331) 30%, transparent);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .border-red-500\/30 {
+      border-color: color-mix(in oklab, var(--color-red-500) 30%, transparent);
+    }
+  }
+
   .border-rose-200 {
     border-color: var(--color-rose-200);
   }
@@ -1887,6 +1890,10 @@
     background-color: var(--color-gray-100);
   }
 
+  .bg-gray-500 {
+    background-color: var(--color-gray-500);
+  }
+
   .bg-gray-600 {
     background-color: var(--color-gray-600);
   }
@@ -1897,6 +1904,16 @@
 
   .bg-gray-800 {
     background-color: var(--color-gray-800);
+  }
+
+  .bg-gray-800\/50 {
+    background-color: color-mix(in srgb, oklch(.278 .033 256.848) 50%, transparent);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-gray-800\/50 {
+      background-color: color-mix(in oklab, var(--color-gray-800) 50%, transparent);
+    }
   }
 
   .bg-gray-900 {
@@ -1933,6 +1950,16 @@
     background-color: var(--color-orange-500);
   }
 
+  .bg-orange-500\/10 {
+    background-color: color-mix(in srgb, oklch(.705 .213 47.604) 10%, transparent);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-orange-500\/10 {
+      background-color: color-mix(in oklab, var(--color-orange-500) 10%, transparent);
+    }
+  }
+
   .bg-orange-600 {
     background-color: var(--color-orange-600);
   }
@@ -1951,6 +1978,16 @@
 
   .bg-primary {
     background-color: var(--primary);
+  }
+
+  .bg-red-500\/10 {
+    background-color: color-mix(in srgb, oklch(.637 .237 25.331) 10%, transparent);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-red-500\/10 {
+      background-color: color-mix(in oklab, var(--color-red-500) 10%, transparent);
+    }
   }
 
   .bg-red-600 {
@@ -2756,6 +2793,10 @@
     color: var(--muted-foreground);
   }
 
+  .text-orange-200 {
+    color: var(--color-orange-200);
+  }
+
   .text-orange-400 {
     color: var(--color-orange-400);
   }
@@ -2774,6 +2815,10 @@
 
   .text-primary-foreground {
     color: var(--primary-foreground);
+  }
+
+  .text-red-200 {
+    color: var(--color-red-200);
   }
 
   .text-red-500 {
@@ -3396,6 +3441,12 @@
   @media (hover: hover) {
     .hover\:text-accent-foreground:hover {
       color: var(--accent-foreground);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-orange-300:hover {
+      color: var(--color-orange-300);
     }
   }
 
