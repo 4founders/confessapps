@@ -24,7 +24,7 @@ type AppState =
 
 export default function App() {
   const [currentPage, setCurrentPage] =
-    useState<AppState>("app");
+    useState<AppState>("landing");
 
   const handleNavigation = (page: string) => {
     setCurrentPage(page as AppState);

@@ -126,7 +126,7 @@ export async function POST(request: Request) {
     response.cookies.set({
       name: 'confessapps_token',
       value: token,
-      httpOnly: true, // La cookie no es accesible desde JavaScript en el cliente
+      httpOnly: false, // Permitir acceso desde JS en el cliente para WebSockets
       secure: process.env.NODE_ENV === 'production', // Solo enviar por HTTPS en producción
       sameSite: 'strict', // Protección CSRF
       maxAge: 60 * 60 * 24 * 3, // 3 días en segundos

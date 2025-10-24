@@ -21,18 +21,27 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 const validGenders = genderOptions.map(option => option.value) as [string, ...string[]];
 const validCountries = countries.map(country => country.value) as [string, ...string[]];
 
-//Esquema de Validación con Zod
-const userSchema = z.object({
-  username: z.string().min(5, { message: "El nombre de usuario debe tener al menos 5 caracteres." }),
-  gender: z.string({error: "El género seleccionado no es válido."}).refine((val) => validGenders.includes(val), { message: "El género seleccionado no es válido." }),
-  country: z.string({error: "El país seleccionado no es válido."}).refine((val) => validCountries.includes(val), { message: "El país seleccionado no es válido." }),
-  email: z.string().email({ message: "El correo electrónico no es válido." }),
-  password: z.string().min(8, { message: "La contraseña debe tener al menos 8 caracteres." }),
-  confirmPassword: z.string(),
-})
-.refine((data) => data.password === data.confirmPassword, {
-  message: "Las contraseñas no coinciden.",
-  path: ["confirmPassword"], // Asigna el error al campo 'confirmPassword'
+// Esquema de validación para las configuraciones del usuario
+const settingsSchema = z.object({
+  app_language: z.string().optional(),
+  autoconnect_call: z.boolean().optional(),
+  confirm_call: z.boolean().optional(),
+  seudonym_pred: z.string().optional(),
+  mic_off: z.boolean().optional(),
+});
+
+// Esquema de Validación para la actualización de datos del usuario
+const updateUserSchema = z.object({
+  // .optional() permite que el campo no venga en la petición.
+  // Si viene, se aplican las demás validaciones (como .min(5)).
+  // Por lo tanto, no se puede enviar un string vacío "".
+  username: z.string().min(5, { message: "El nombre de usuario debe tener al menos 5 caracteres." }).optional(),
+  //email: z.string().email({ message: "El correo electrónico no es válido." }).optional(),   DE MOMENTO NO VAMOS A PERMITIR ACTUALIZAR EMAIL
+  gender: z.string({error: "El género seleccionado no es válido."}).refine((val) => validGenders.includes(val), { message: "El género seleccionado no es válido." }).optional(),
+  avatar: z.number().optional(),
+  // Añadimos el objeto de settings, también opcional
+  settings: settingsSchema.optional(),
+  // Se pueden añadir otros campos que se quieran actualizar aquí
 });
 
 
@@ -71,10 +80,10 @@ export async function GET(request: Request) {
 
   
 //Actualiza los datos del usuario autenticado.
-/* export async function PUT(request: Request) {
+export async function PUT(request: Request) {
   try {
     // 1. Obtener y verificar el token JWT
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('confessapps_token');
 
     if (!token) {
@@ -86,12 +95,17 @@ export async function GET(request: Request) {
 
     // 2. Obtener y validar los datos del cuerpo de la petición
     const body = await request.json();
+
+
+    
+
     const validation = updateUserSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({ message: "Datos de entrada inválidos.", errors: validation.error.issues }, { status: 400 });
     }
 
+    
     const dataToUpdate = validation.data;
 
     // 3. Conectar a la BD y actualizar el usuario
@@ -105,6 +119,7 @@ export async function GET(request: Request) {
       }
     }
 
+
     const updatedUser = await User.findByIdAndUpdate(userId, { $set: dataToUpdate }, { new: true, runValidators: true }).select('-password');
 
     if (!updatedUser) {
@@ -112,10 +127,10 @@ export async function GET(request: Request) {
     }
 
     // 4. Devolver el usuario actualizado
-    return NextResponse.json(updatedUser, { status: 200 });
+    return NextResponse.json(updatedUser, { status: 200 }); 
 
   } catch (error) {
     console.error("Error en PUT /api/user/profile:", error);
     return NextResponse.json({ message: "Error interno del servidor." }, { status: 500 });
   }
-} */
+} 

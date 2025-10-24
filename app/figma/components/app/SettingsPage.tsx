@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Camera } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -37,42 +37,16 @@ import {
   Check,
 } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { avatarOptions } from "@/app/figma/data/avatarOptions";
+import { useUser } from "@/context/UserContext";
+import { languages, countries, genderOptions } from "../../data/countries-languages";
+import { format } from 'date-fns';
+import axios from "axios";
+import { toast } from "sonner";
 
 type PlanType = "free" | "premium";
 
 // Available avatar options with cat images
-const avatarOptions = [
-  {
-    id: "1",
-    src: "https://images.unsplash.com/photo-1710997740246-75b30937dd6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwcG9ydHJhaXR8ZW58MXx8fHwxNzU2OTQwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato actual",
-  },
-  {
-    id: "2",
-    src: "https://images.unsplash.com/photo-1712592000997-ea7ccaeb9725?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvcmFuZ2UlMjB0YWJieSUyMGNhdHxlbnwxfHx8fDE3NTY5NzUxMzZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato naranja",
-  },
-  {
-    id: "3",
-    src: "https://images.unsplash.com/photo-1689871404673-cc43adec4ae8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmF5JTIwa2l0dGVufGVufDF8fHx8MTc1NjkyNTgxNXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato gris",
-  },
-  {
-    id: "4",
-    src: "https://images.unsplash.com/photo-1657314310600-6a63e9ef1859?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxibGFjayUyMGNhdCUyMHBvcnRyYWl0fGVufDF8fHx8MTc1Njk4MDU5NXww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato negro",
-  },
-  {
-    id: "5",
-    src: "https://images.unsplash.com/photo-1704947807029-c75381b64869?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMGZsdWZmeSUyMGNhdHxlbnwxfHx8fDE3NTY5NzUxMzd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato blanco",
-  },
-  {
-    id: "6",
-    src: "https://images.unsplash.com/photo-1568152950566-c1bf43f4ab28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzaWFtZXNlJTIwY2F0fGVufDF8fHx8MTc1Njk4MTczM3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
-    alt: "Gato siamés",
-  },
-];
 
 interface SettingsPageProps {
   currentPlan: PlanType;
@@ -85,38 +59,85 @@ export function SettingsPage({
   setCurrentPlan,
   onNavigateToPremium,
 }: SettingsPageProps) {
+  const { user, setUser } = useUser();
+
+  // Si el usuario no se ha cargado, no renderizar nada (o un loader)
+  if (!user) {
+    return null;
+  }
+
   // Estados para ajustes de perfil
-  const [fullName] = useState("Juan Pérez");
-  const [email, setEmail] = useState("juan.perez@example.com");
-  const [address, setAddress] = useState(
-    "Calle Principal 123, Santiago, Chile",
+  const [email, setEmail] = useState(user.email); //El Email, aunque se envie, no se puede modificar por ahora
+  const [username, setUsername] = useState(user.username);
+  const [currentAvatar, setCurrentAvatar] = useState(() => 
+    avatarOptions.find(opt => opt.id === String(user.avatar)) || avatarOptions[0]
   );
-  const [birthDate] = useState("1990-05-15");
-  const [username, setUsername] = useState("felipe123");
-  const [currentAvatar, setCurrentAvatar] = useState(
-    avatarOptions[0],
-  );
-  const [selectedAvatar, setSelectedAvatar] = useState(
-    avatarOptions[0],
-  );
+  const [gender, setGender] = useState(user.gender);
   const [isAvatarModalOpen, setIsAvatarModalOpen] =
     useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Estados para ajustes generales
-  const [language, setLanguage] = useState("es");
-  const [autoConnect, setAutoConnect] = useState(false);
-  const [confirmBeforeCall, setConfirmBeforeCall] =
-    useState(true);
-  const [defaultPseudonym, setDefaultPseudonym] = useState("");
-  const [muteOnStart, setMuteOnStart] = useState(false);
+  const [appLanguage, setAppLanguage] = useState(user.settings.app_language);
+  const [autoConnect, setAutoConnect] = useState(user.settings.autoconnect_call);
+  const [confirmBeforeCall, setConfirmBeforeCall] = useState(user.settings.confirm_call);
+  const [defaultPseudonym, setDefaultPseudonym] = useState(user.settings.seudonym_pred);
+  const [muteOnStart, setMuteOnStart] = useState(user.settings.mic_off);
 
   const handleAvatarClick = () => {
-    setSelectedAvatar(currentAvatar);
     setIsAvatarModalOpen(true);
   };
 
-  const handleSaveAvatar = () => {
-    setCurrentAvatar(selectedAvatar);
+  const handleAvatarChange = (newAvatar: typeof avatarOptions[0]) => {
+    console.log("Avatar cambiado a:", newAvatar);
+    setCurrentAvatar(newAvatar);
+    // Opcional: Si quieres guardar inmediatamente sin presionar un botón de "Guardar"
+    // podrías llamar a una función que haga la petición a la API aquí.
+  };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    setError(null);
+
+    const dataToUpdate = {
+      username,
+      gender,
+      avatar: Number(currentAvatar.id),
+      settings: {
+        app_language: appLanguage,
+        autoconnect_call: autoConnect,
+        confirm_call: confirmBeforeCall,
+        seudonym_pred: defaultPseudonym, // Corregido: seudonym_pred -> seudonym_pred
+        mic_off: muteOnStart,
+      }
+    };
+
+    try {
+      const response = await axios.put('/api/users/me', dataToUpdate);
+      setUser(response.data); // Actualiza el contexto con el usuario devuelto por la API
+      toast.success("Cambios guardados exitosamente", {
+        position: "top-center",
+        duration: 3000,
+        classNames: {
+          icon: 'text-green-500'
+        }
+      });
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Ocurrió un error al guardar.");
+      toast.error(err.response?.data?.message || "Ocurrió un error al guardar.", {
+        position: "top-center",
+        duration: 3000,
+        classNames: {
+          icon: 'text-red-500'
+        }
+      });
+
+    } finally {
+      setIsSaving(false);
+    }
+
+
     setIsAvatarModalOpen(false);
   };
 
@@ -187,25 +208,6 @@ export function SettingsPage({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Nombre Completo */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="fullName"
-                  className="text-white"
-                >
-                  Nombre Completo
-                </Label>
-                <Input
-                  id="fullName"
-                  value={fullName}
-                  disabled
-                  className="bg-gray-800 border-gray-700 text-gray-400"
-                />
-                <p className="text-xs text-gray-500">
-                  No se puede modificar
-                </p>
-              </div>
-
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-white">
@@ -215,46 +217,14 @@ export function SettingsPage({
                   id="email"
                   type="email"
                   value={email}
+                  disabled
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-gray-800 border-gray-700 text-white focus:border-orange-500"
                 />
               </div>
 
-              {/* Dirección */}
-              <div className="space-y-2">
-                <Label htmlFor="address" className="text-white">
-                  Dirección
-                </Label>
-                <Input
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="bg-gray-800 border-gray-700 text-white focus:border-orange-500"
-                />
-              </div>
-
-              {/* Fecha de Nacimiento */}
-              <div className="space-y-2">
-                <Label
-                  htmlFor="birthDate"
-                  className="text-white"
-                >
-                  Fecha de Nacimiento
-                </Label>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  value={birthDate}
-                  disabled
-                  className="bg-gray-800 border-gray-700 text-gray-400"
-                />
-                <p className="text-xs text-gray-500">
-                  No se puede modificar
-                </p>
-              </div>
-
               {/* Nombre de Usuario */}
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label
                   htmlFor="username"
                   className="text-white"
@@ -269,10 +239,83 @@ export function SettingsPage({
                   placeholder="Ej: usuario_confess"
                 />
               </div>
+
+              {/* Fecha de Nacimiento */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="birthDate"
+                  className="text-white"
+                >
+                  Fecha de Nacimiento (YYYY-MM-DD)
+                </Label>
+                <Input
+                  id="birthDate"
+                  type="date"
+                  value={format(new Date(user.birthdate), 'yyyy-MM-dd')}
+                  disabled
+                  className="bg-gray-800 border-gray-700 text-gray-400"
+                />
+                {/* <p className="text-xs text-gray-500">
+                  No se puede modificar
+                </p> */}
+              </div>
+
+              {/* País */}
+              <div className="space-y-2">
+                <Label htmlFor="country" className="text-white">
+                  País
+                </Label>
+                <Input
+                  id="country"
+                  value={countries.find(c => c.value === user.country)?.label || user.country}
+                  disabled
+                  className="bg-gray-800 border-gray-700 text-gray-400"
+                />
+              </div>
+
+              {/* Idioma */}
+              <div className="space-y-2">
+                <Label htmlFor="language" className="text-white">
+                  Idioma
+                </Label>
+                <Input
+                  id="language"
+                  value={languages.find(l => l.value === user.language)?.label || user.language}
+                  disabled
+                  className="bg-gray-800 border-gray-700 text-gray-400"
+                />
+              </div>
+
+              {/* Género */}
+              <div className="space-y-2">
+                <Label htmlFor="gender" className="text-white">
+                  Género
+                </Label>
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    {genderOptions.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="text-white hover:bg-gray-700"
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <Button className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
-              Guardar Cambios
+            <Button 
+              onClick={handleSaveChanges}
+              disabled={isSaving}
+              className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white disabled:opacity-50"
+            >
+              {isSaving ? 'Guardando...' : 'Guardar Cambios'}
             </Button>
           </CardContent>
         </Card>
@@ -394,25 +437,22 @@ export function SettingsPage({
                 Idioma de la aplicación
               </Label>
               <Select
-                value={language}
-                onValueChange={setLanguage}
+                value={appLanguage}
+                onValueChange={setAppLanguage}
               >
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem
-                    value="es"
-                    className="text-white hover:bg-gray-700"
-                  >
-                    Español
-                  </SelectItem>
-                  <SelectItem
-                    value="en"
-                    className="text-white hover:bg-gray-700"
-                  >
-                    English
-                  </SelectItem>
+                  {languages.map((lang) => (
+                    <SelectItem
+                      key={lang.value}
+                      value={lang.value}
+                      className="text-white hover:bg-gray-700"
+                    >
+                      {lang.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -513,8 +553,12 @@ export function SettingsPage({
               </div>
             </div>
 
-            <Button className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
-              Guardar Preferencias
+            <Button 
+              onClick={handleSaveChanges}
+              disabled={isSaving}
+              className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white disabled:opacity-50"
+            >
+              {isSaving ? 'Guardando...' : 'Guardar Preferencias'}
             </Button>
           </CardContent>
         </Card>
@@ -537,18 +581,18 @@ export function SettingsPage({
                   <div
                     key={avatar.id}
                     className={`relative w-20 h-20 rounded-full overflow-hidden cursor-pointer border-2 transition-all duration-200 ${
-                      selectedAvatar.id === avatar.id
+                      currentAvatar.id === avatar.id
                         ? "border-orange-500 ring-2 ring-orange-500 ring-opacity-50"
                         : "border-gray-600 hover:border-gray-500"
                     }`}
-                    onClick={() => setSelectedAvatar(avatar)}
+                    onClick={() => handleAvatarChange(avatar)}
                   >
                     <ImageWithFallback
                       src={avatar.src}
                       alt={avatar.alt}
                       className="w-full h-full object-cover"
                     />
-                    {selectedAvatar.id === avatar.id && (
+                    {currentAvatar.id === avatar.id && (
                       <div className="absolute inset-0 bg-orange-500 bg-opacity-20 flex items-center justify-center">
                         <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
                           <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -560,7 +604,7 @@ export function SettingsPage({
               </div>
 
               <Button
-                onClick={handleSaveAvatar}
+                onClick={() => setIsAvatarModalOpen(false)}
                 className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white border-none"
               >
                 Guardar Cambios

@@ -1,49 +1,263 @@
-import { useState } from "react";
+"use client"
+import { useState, useEffect, useRef } from "react";
 import { Mic, Headphones, Phone } from "lucide-react";
 import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { countries, languages } from "../../data/countries-languages";
+import { useUser } from "@/context/UserContext";
+import { toast } from "sonner";
+import { io, Socket } from 'socket.io-client';
+import Cookies from 'js-cookie';
+import { CallPage } from "@/app/figma/components/app/CallPage";
+import Loading from "@/app/figma/components/Loading";
+
 
 type RoleType = 'speak' | 'listen' | null;
 
 interface ConnectPageProps {
-  onStartCall?: () => void;
+  onStartCall: () => void;
 }
 
 export function ConnectPage({ onStartCall }: ConnectPageProps) {
+  const { user } = useUser();
   const [selectedRole, setSelectedRole] = useState<RoleType>(null);
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
-  const [nickname, setNickname] = useState<string>('');
+  const [selectedCountry, setSelectedCountry] = useState<string>(user?.country || '');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(user?.language || '');
+  const [nickname, setNickname] = useState<string>(user?.settings.seudonym_pred || '');
+  const [isSearching, setIsSearching] = useState(false);
+  const [callStarted, setCallStarted] = useState(false);
+  const [opponentUsername, setOpponentUsername] = useState('');
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [opponentAvatar, setOpponentAvatar] = useState(2); // Avatar predeterminado
 
-  const handleConnect = () => {
+  // Referencias para WebRTC y Socket.IO
+  const socketRef = useRef<Socket | null>(null);
+  const pcRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
+  const callIdRef = useRef<string | null>(null);
+  const bufferedCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+
+  useEffect(() => {
+    // Limpiar al desmontar
+    return () => {
+      socketRef.current?.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    // Asegura que los estados se actualicen si el usuario cambia
+    if (user) {
+      setSelectedCountry(user.country);
+      setSelectedLanguage(user.language);
+      setNickname(user.settings.seudonym_pred);
+    }
+  }, [user]);
+
+  const resetCall = () => {
+    if (pcRef.current) {
+      pcRef.current.close();
+      pcRef.current = null;
+    }
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null;
+      remoteStreamRef.current = null;
+      setRemoteStream(null);
+    }
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+    callIdRef.current = null;
+    setCallStarted(false);
+    toast.info("Llamada finalizada.", { position: "top-center" });
+  };
+
+  const handleCancelSearch = () => {
+    setIsSearching(false);
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null;
+    }
+    toast.info("Búsqueda de match cancelada.", { position: "top-center" });
+  };
+
+  const handleConnect = async () => {
     if (!selectedRole) {
-      alert('Por favor, elige tu rol antes de conectar');
+      toast.error("Debes elegir tu rol antes de poder conectar", {
+        position: "top-center",
+        duration: 3000,
+      });
       return;
     }
     
-    console.log('Connecting with:', {
-      role: selectedRole,
-      country: selectedCountry,
-      language: selectedLanguage,
-      nickname: nickname
-    });
-    
-    // Call the onStartCall function if provided
-    if (onStartCall) {
-      onStartCall();
-    } else {
-      // Fallback for development
-      alert('Conectando... (funcionalidad próximamente)');
+    try {
+      // 1. Pedir permisos de micrófono
+      const stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+      localStreamRef.current = stream;
+
+      // 2. Iniciar búsqueda y conectar al servidor de señalización
+      setIsSearching(true);
+      const socket = io(process.env.SOCKETS_URL || 'http://localhost:3002');
+      socketRef.current = socket;
+
+      // --- Lógica de WebRTC y Socket.IO ---
+
+      const servers = {
+        iceServers: [
+          { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
+        ],
+        iceCandidatePoolSize: 10,
+      };
+
+      const createPeerConnection = () => {
+        const pc = new RTCPeerConnection(servers);
+        pcRef.current = pc;
+        bufferedCandidatesRef.current = [];
+
+        localStreamRef.current?.getTracks().forEach(track => {
+          pc.addTrack(track, localStreamRef.current!);
+        });
+
+        pc.ontrack = (event) => {
+          remoteStreamRef.current = new MediaStream();
+          event.streams[0].getTracks().forEach(track => {
+            remoteStreamRef.current!.addTrack(track);
+            setRemoteStream(remoteStreamRef.current);
+          });
+          // Aquí podrías pasar el remoteStream a la CallPage
+        };
+
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            if (callIdRef.current) {
+              socket.emit('iceCandidate', { callId: callIdRef.current, candidate: event.candidate.toJSON() });
+            } else {
+              bufferedCandidatesRef.current.push(event.candidate.toJSON());
+            }
+          }
+        };
+        return pc;
+      };
+
+      const startCall = async (pc: RTCPeerConnection) => {
+        try {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          socket.emit('webrtcOffer', { callId: callIdRef.current, offer });
+        } catch (err) {
+          console.error('Error al crear la oferta:', err);
+        }
+      };
+
+      socket.on('connect', () => {
+        console.log('Conectado al servidor de señalización con ID:', socket.id);
+        // 3. Enviar solicitud de matchmaking
+        const token = Cookies.get('confessapps_token');
+
+        socket.emit('findMatch', {
+          auth: token,
+          role: selectedRole,
+          nickname: nickname,
+          country: selectedCountry,
+          language: selectedLanguage,
+          avatar: user?.avatar || 1,
+        });
+      });
+
+      socket.on('matchFound', async (data) => {
+        console.log('Match encontrado:', data);
+        const { callId: newCallId, opponent, role } = data;
+        callIdRef.current = newCallId;
+        setIsSearching(false); // Ocultar pantalla de carga
+        setOpponentUsername(opponent.nickname);
+
+        const pc = createPeerConnection();
+
+        if (bufferedCandidatesRef.current.length > 0) {
+          bufferedCandidatesRef.current.forEach(candidate => {
+            socket.emit('iceCandidate', { callId: callIdRef.current, candidate });
+          });
+          bufferedCandidatesRef.current = [];
+        }
+
+        if (role === 'caller') {
+          await startCall(pc);
+        }
+
+        setCallStarted(true);
+      });
+
+      socket.on('webrtcOffer', async (data) => {
+        const pc = pcRef.current;
+        if (!pc || !data.offer) return;
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit('webrtcAnswer', { callId: callIdRef.current, answer });
+      });
+
+      socket.on('webrtcAnswer', async (data) => {
+        const pc = pcRef.current;
+        if (!pc || !data.answer || pc.currentRemoteDescription) return;
+        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+      });
+
+      socket.on('iceCandidate', (data) => {
+        const pc = pcRef.current;
+        if (pc && data.candidate) {
+          pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+      });
+
+      socket.on('hangup', () => {
+        console.log('El otro usuario ha colgado');
+        resetCall();
+      });
+
+    } catch (err) {
+      console.error('Error al obtener permisos de micrófono:', err);
+      toast.error("No fue posible conectarse. Se requieren permisos de micrófono.", {
+        position: "top-center",
+        duration: 4000,
+      });
+      setIsSearching(false);
     }
   };
+
+  if (callStarted) {
+    return (
+      <CallPage
+        localStream={localStreamRef.current}
+        remoteStream={remoteStream}
+        opponentUsername={opponentUsername}
+        opponentAvatar={opponentAvatar}
+        socketRef={socketRef}
+        callIdRef={callIdRef}
+        userNickname={nickname}
+        onEndCall={resetCall}
+      />
+    );
+  }
 
   return (
     <div className="p-6 min-h-full">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-2">Conectar</h1>
+        {isSearching && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
+            <Button onClick={handleCancelSearch} variant="outline" className="mt-8 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+              Cancelar Búsqueda
+            </Button>
+          </div>
+        )}
         <p className="text-gray-400 mb-12">Encuentra a alguien con quien hablar o alguien que te escuche</p>
         
         {/* Role Selection */}

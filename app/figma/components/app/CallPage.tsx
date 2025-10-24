@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, MutableRefObject } from "react";
 import {
   PhoneOff,
   MessageSquare,
@@ -15,16 +15,43 @@ import {
 } from "../ui/card";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { toast } from "sonner";
+import { avatarOptions } from "@/app/figma/data/avatarOptions";
+import { useUser } from "@/context/UserContext";
+import { Socket } from "socket.io-client";
 
 interface CallPageProps {
   onEndCall: () => void;
+  localStream: MediaStream | null;
+  remoteStream: MediaStream | null;
+  opponentUsername: string;
+  opponentAvatar: number;
+  userNickname: string;
+  socketRef: MutableRefObject<Socket | null>;
+  callIdRef: MutableRefObject<string | null>;
 }
 
-export function CallPage({ onEndCall }: CallPageProps) {
-  const [is_over, setIsOver] = useState(true);
+export function CallPage({ onEndCall, localStream, remoteStream, opponentUsername, opponentAvatar, userNickname, socketRef, callIdRef }: CallPageProps) {
+  const { user } = useUser();
+
+  if (!user) {
+    return null; // O un componente de carga si el usuario aún no está disponible
+  }
+
+  const [is_over, setIsOver] = useState(false);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [showSOSMenu, setShowSOSMenu] = useState(false);
+
+  const localAudioRef = useRef<HTMLAudioElement>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    // Asigna los streams a los elementos de audio cuando las props cambien.
+    // Esto asegura que se usen los nuevos streams en una nueva llamada.
+    if (localAudioRef.current) localAudioRef.current.srcObject = localStream;
+    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = remoteStream;
+
+  }, [localStream, remoteStream]);
 
   const handleEndCall = () => {
     setIsOver(true);
@@ -51,7 +78,6 @@ export function CallPage({ onEndCall }: CallPageProps) {
   };
 
   const handleSpeak = () => {
-    // TODO: Implement speak functionality
     console.log("Speak button clicked");
   };
 
@@ -60,25 +86,33 @@ export function CallPage({ onEndCall }: CallPageProps) {
   };
 
   const handleFinalizeCall = () => {
-    onEndCall();
+    if (socketRef.current && callIdRef.current) {
+      socketRef.current.emit('hangup', { callId: callIdRef.current });
+    }
+    onEndCall(); // Llama a la función resetCall pasada desde ConnectPage
   };
 
   return (
-    <div className="h-screen bg-black text-white flex flex-col">
+    <div className="fixed inset-0 z-50 h-screen w-screen bg-black text-white flex flex-col">
+      {/* Audio elements for WebRTC streams */}
+      <audio ref={localAudioRef} autoPlay muted playsInline />
+      <audio ref={remoteAudioRef} autoPlay playsInline />
+
       {/* User Rows */}
       <div className="flex-1 flex flex-col">
         {/* Other User Row */}
         <div className="flex-1 flex items-center justify-center border-b border-gray-800">
           <div className="text-center">
+            {/* Avatar oponent*/}
             <div className="w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-700">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1670166953612-6bedb26d8c81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvcmFuZ2UlMjB0YWJieSUyMGNhdCUyMGZhY2V8ZW58MXx8fHwxNzU1ODkwNzMzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={avatarOptions.find(opt => opt.id === String(opponentAvatar))?.src || avatarOptions[0].src}
                 alt="Other User Profile"
                 className="w-full h-full object-cover"
               />
             </div>
             <h2 className="text-xl font-semibold text-white mb-2">
-              @daniel123
+              @{opponentUsername || "daniel123"}
             </h2>
             <div className="flex items-center justify-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -93,14 +127,15 @@ export function CallPage({ onEndCall }: CallPageProps) {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-700">
+              {/* Avatar usuario*/}
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1710997740246-75b30937dd6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwcG9ydHJhaXR8ZW58MXx8fHwxNzU1ODQ0MDcxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                src={avatarOptions.find(opt => opt.id === String(user.avatar))?.src || avatarOptions[0].src}
                 alt="Your Profile"
                 className="w-full h-full object-cover"
               />
             </div>
             <h2 className="text-xl font-semibold text-white mb-2">
-              @felipe123
+              @{userNickname}
             </h2>
             <div className="flex items-center justify-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -220,7 +255,7 @@ export function CallPage({ onEndCall }: CallPageProps) {
             <CardContent className="space-y-6">
               <div className="text-center">
                 <span className="text-2xl font-semibold text-orange-400">
-                  @daniel123
+                  @{opponentUsername}
                 </span>
               </div>
               <div className="flex space-x-3">

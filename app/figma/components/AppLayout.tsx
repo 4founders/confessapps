@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Phone,
   Search,
@@ -18,7 +18,10 @@ import { PremiumUpgrade } from "./app/PremiumUpgrade";
 import { Summary } from "./app/Summary";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { Button } from "./ui/button";
+import { useUser } from "@/context/UserContext";
+import Loading from "@/app/figma/components/Loading";
 import { ConfessAppsLogo } from "./ConfessAppsLogo";
+import { avatarOptions } from "../data/avatarOptions";
 
 type TabType = "connect" | "explore" | "profile" | "settings";
 type AppState =
@@ -42,6 +45,7 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ onNavigate }: AppLayoutProps) {
+  const { user, isLoading } = useUser();
   const [activeTab, setActiveTab] =
     useState<TabType>("connect");
   const [appState, setAppState] = useState<AppState>("main");
@@ -51,6 +55,27 @@ export function AppLayout({ onNavigate }: AppLayoutProps) {
   } | null>(null);
   const [currentPlan, setCurrentPlan] = useState<"free" | "premium">("free");
   const [selectedBillingCycle, setSelectedBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+
+
+
+
+
+  useEffect(() => {
+    // Si no está cargando y no hay usuario, redirigir a la página de autenticación.
+    if (!isLoading && !user) {
+      onNavigate("auth");
+    }
+  }, [isLoading, user, onNavigate]);
+
+  // Muestra la pantalla de carga mientras se obtienen los datos del usuario.
+  if (isLoading || !user) {
+    return <Loading />;
+  }
+
+  const handleLogout = async() => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/auth';
+  };
 
   const handleStartCall = () => {
     setAppState("call");
@@ -148,11 +173,6 @@ export function AppLayout({ onNavigate }: AppLayoutProps) {
     setAppState("main");
     setActiveTab("settings");
   };
-
-  // If in call state, show call page
-  if (appState === "call") {
-    return <CallPage onEndCall={handleEndCall} />;
-  }
 
   // If in create post state, show create post page
   if (appState === "createPost") {
@@ -303,22 +323,20 @@ export function AppLayout({ onNavigate }: AppLayoutProps) {
           <div className="p-6 border-t border-gray-800">
             <div className="flex flex-col items-center text-center">
               <div className="w-20 h-20 rounded-full overflow-hidden mb-3 border-2 border-gray-700">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1710997740246-75b30937dd6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwcG9ydHJhaXR8ZW58MXx8fHwxNzU1ODQ0MDcxfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+                 <ImageWithFallback
+                  src={avatarOptions.find(opt => opt.id === String(user.avatar))?.src || avatarOptions[0].src}
                   alt="Profile Picture"
                   className="w-full h-full object-cover"
                 />
               </div>
               <span className="text-gray-300 text-sm mb-4">
-                @felipe123
+                @{user.username}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 className="w-full bg-transparent border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white"
-                onClick={() => {
-                  onNavigate("auth");
-                }}
+                onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Cerrar sesión

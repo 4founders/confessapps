@@ -1,6 +1,20 @@
 import mongoose, { Schema } from 'mongoose';
 import { avatarOptions } from '@/app/figma/data/avatarOptions';
 
+// Definimos el sub-esquema para las configuraciones del usuario
+const settingsSchema = new Schema({
+  app_language: { type: String, default: 'es' },
+  autoconnect_call: { type: Boolean, default: true },
+  confirm_call: { type: Boolean, default: false },
+  seudonym_pred: { type: String },
+  mic_off: { type: Boolean, default: false },
+}, { _id: false }); // _id: false para evitar que Mongoose cree un _id para el subdocumento
+
+
+
+
+
+
 // Definimos el esquema del usuario
 const userSchema = new Schema({
   username: { 
@@ -35,9 +49,21 @@ const userSchema = new Schema({
     // Establece la fecha 7 días en el futuro desde el momento de la creación
     default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   },
+  settings: {
+    type: settingsSchema,
+    default: () => ({})
+  },
 }, {
   // Añade automáticamente los campos createdAt y updatedAt
   timestamps: true,
+});
+
+// Hook para establecer el seudónimo predeterminado antes de guardar
+userSchema.pre('save', function(next) {
+  if (this.isNew && this.settings && !this.settings.seudonym_pred) {
+    this.settings.seudonym_pred = this.username;
+  }
+  next();
 });
 
 // Para evitar que el modelo se compile varias veces en desarrollo,

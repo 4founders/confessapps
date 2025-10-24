@@ -71,7 +71,7 @@ export function Auth({ onNavigate }: AuthProps) {
       })
       .then(res => {
         // Si la respuesta fue exitosa y el navegador siguió una redirección...
-        if (res.ok && res.redirected) {
+        if (res.redirected) {
           // ...forzamos la navegación del cliente a la URL final.
           window.location.href = res.url;
           return; // No es necesario seguir procesando.
@@ -140,12 +140,14 @@ export function Auth({ onNavigate }: AuthProps) {
         body: JSON.stringify({ username, birthdate, gender, country, language, email, password, confirmPassword }),
       })
       .then(res => {
-        if (res.ok && res.redirected) {
+        console.log("Respuesta del registro:", res);
+
+        if (res.redirected) {
           window.location.href = res.url;
           return;
         }
         if (!res.ok) {
-          return res.json().then(errorData => {
+          return res.json().then(errorData  => {
             // Verificamos que `errors` sea un arreglo antes de mapearlo
             if (errorData && Array.isArray(errorData.errors)) {
               const errorMessages = errorData.errors.map((err: { message: string }) => err.message);
