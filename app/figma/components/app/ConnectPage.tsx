@@ -104,8 +104,10 @@ export function ConnectPage({ onStartCall }: ConnectPageProps) {
       localStreamRef.current = stream;
 
       // 2. Iniciar búsqueda y conectar al servidor de señalización
+
       setIsSearching(true);
-      const socket = io(process.env.SOCKETS_URL || 'http://localhost:3002');
+
+      const socket = io(process.env.NODE_ENV === 'production' ? (process.env.SOCKETS_URL_PRODUCTION || 'https://signal.confessapps.com') : (process.env.SOCKETS_URL_DEVELOPMENT || 'http://localhost:3002'));
       socketRef.current = socket;
 
       // --- Lógica de WebRTC y Socket.IO ---
