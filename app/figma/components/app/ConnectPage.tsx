@@ -252,7 +252,7 @@ export function ConnectPage({ onStartCall }: ConnectPageProps) {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-2">Conectar</h1>
         {isSearching && (
-          <div className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 h-screen w-screen">
             <Button onClick={handleCancelSearch} variant="outline" className="mt-8 bg-transparent border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
               Cancelar Búsqueda
             </Button>
